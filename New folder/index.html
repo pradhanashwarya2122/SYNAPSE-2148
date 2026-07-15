@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SYNAPSE — When AI Disagrees, Humanity Decides</title>
-  
-  <!-- PRELOAD the hero video at top priority -->
-  <link rel="preload" as="video" href="C:\Users\Hp\SYNAPSE-2148\assets\spaceship.mp4" type="video/mp4" fetchpriority="high">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -43,7 +39,7 @@
       * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
 
-    /* === video layer – with preload & fetchpriority === */
+    /* === video layer – uses the exact file path === */
     .video-layer {
       position: fixed;
       inset: 0;
@@ -85,8 +81,10 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
-    /* === loader – hidden === */
-    #loader { display: none; }
+    /* === loader – now hidden permanently === */
+    #loader {
+      display: none; /* loader removed entirely */
+    }
 
     /* === HUD === */
     .hud {
@@ -286,12 +284,12 @@
 </head>
 <body>
 
-  <!-- ===== LOADER – removed ===== -->
+  <!-- ===== LOADER – removed, no longer visible ===== -->
   <div id="loader" style="display:none;"></div>
 
-  <!-- ===== VIDEO LAYER – with preload="auto" and fetchpriority="high" ===== -->
+  <!-- ===== VIDEO LAYER – with your exact file path ===== -->
   <div class="video-layer">
-    <video autoplay muted loop playsinline preload="auto" fetchpriority="high">
+    <video autoplay muted loop playsinline>
       <source src="C:\Users\Hp\SYNAPSE-2148\assets\spaceship.mp4" type="video/mp4">
     </video>
   </div>
@@ -318,14 +316,7 @@
     <section class="beat" id="beat-5"><div class="beat-inner"><div class="beat-text medium">For decades, it has kept the Federation in perfect balance.</div></div></section>
     <section class="beat" id="beat-6"><div class="beat-inner"><div class="beat-text pivot">Until today.</div></div></section>
     <section class="beat" id="beat-7"><div class="beat-inner"><div class="beat-eyebrow">Live Alert · Consensus Engine</div><div class="synapse-mark" style="margin-bottom: 22px;"><svg class="orbit-ring critical" viewBox="0 0 54 54"><circle class="core" cx="27" cy="27" r="4"></circle><circle cx="27" cy="27" r="24"></circle></svg></div><div class="beat-text large">Somewhere among 2.6 billion AI agents, consensus is breaking.</div></div></section>
-    
-    <!-- ===== BEAT 8: agent cards removed ===== -->
-    <section class="beat" id="beat-8">
-      <div class="beat-inner">
-        <div class="beat-text large">And humanity must decide what happens next.</div>
-        <a href="#" class="cta-button" id="cta-btn">Begin Mission →</a>
-      </div>
-    </section>
+    <section class="beat" id="beat-8"><div class="beat-inner"><div class="beat-text large">And humanity must decide what happens next.</div><a href="#" class="cta-button" id="cta-btn">Begin Mission →</a></div></section>
   </main>
 
   <!-- ===== NAV ===== -->
@@ -334,9 +325,12 @@
 
   <script>
     // =========================================================
-    // CONFIG
+    // CONFIG — set your redirect URL
     // =========================================================
-    const REDIRECT_URL = "aegis-hyperlane.html";
+    const REDIRECT_URL = "aegis-hyperlane.html"; // change as needed
+
+    // ---------- loader: completely bypassed ----------
+    // (no loader logic runs; we just set first beat active)
 
     // ---------- slide engine ----------
     const beats = Array.from(document.querySelectorAll('.beat'));
@@ -430,7 +424,7 @@
     function next() { if (current < total - 1) goTo(current + 1); }
     function prev() { if (current > 0) goTo(current - 1); }
 
-    // activate first beat
+    // activate first beat immediately
     beats[0].classList.add('active');
     dots[0].classList.add('active');
 
