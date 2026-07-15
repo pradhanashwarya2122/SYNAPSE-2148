@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SYNAPSE — When AI Disagrees, Humanity Decides</title>
   
-  <!-- PRELOAD hero video with high priority & cross-origin support -->
-  <link rel="preload" as="video" href="C:\Users\Hp\SYNAPSE-2148\assets\spaceship.mp4" type="video/mp4" fetchpriority="high">
-  <!-- Also preconnect to the file origin (local file system) -->
-  <link rel="preconnect" href="file:///C:/Users/Hp/SYNAPSE-2148/assets/">
+  <!-- PRELOAD hero video with relative path -->
+  <link rel="preload" as="video" href="assets/spaceship.mp4" type="video/mp4" fetchpriority="high">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,7 +51,7 @@
       height: 100%;
       z-index: -3;
       overflow: hidden;
-      background: var(--void); /* fallback color while video loads */
+      background: var(--void);
     }
 
     .video-layer video {
@@ -67,12 +65,6 @@
       transform: translate(-50%, -50%);
       object-fit: cover;
       filter: saturate(0.75) brightness(0.55);
-      /* These attributes ensure the video loads and plays even on slower connections */
-      preload: auto;
-      autoplay: true;
-      muted: true;
-      loop: true;
-      playsinline: true;
     }
 
     /* Fallback: if video fails, show a gradient */
@@ -311,12 +303,12 @@
   <!-- ===== LOADER – removed ===== -->
   <div id="loader" style="display:none;"></div>
 
-  <!-- ===== VIDEO LAYER – with robust loading & fallback ===== -->
+  <!-- ===== VIDEO LAYER – with relative path ===== -->
   <div class="video-layer" id="videoLayer">
     <!-- Fallback background shown if video fails -->
     <div class="fallback-bg" id="fallbackBg"></div>
     
-    <!-- Primary video with all optimizations -->
+    <!-- Primary video with relative path -->
     <video 
       id="heroVideo"
       autoplay 
@@ -326,10 +318,9 @@
       preload="auto" 
       fetchpriority="high"
       disablePictureInPicture
-      crossorigin="anonymous"
     >
-      <source src="C:\Users\Hp\SYNAPSE-2148\assets\spaceship.mp4" type="video/mp4">
-      <!-- Fallback: if the primary source fails, try an alternative (if available) -->
+      <source src="assets/spaceship.mp4" type="video/mp4">
+      <!-- Additional fallback path if needed -->
       <source src="spaceship.mp4" type="video/mp4">
     </video>
   </div>
