@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>SYNAPSE — AI Agent Swarm Control Center</title>
-<link rel="preload" as="video" href="assets/space.mp4" type="video/mp4">
+<title>Aegis Nexus — AI Agent Swarm Control Center</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -325,15 +324,21 @@ body.loading { overflow:hidden; }
 .kw-highlight { color:#F8FAFC; font-weight:600; }
 </style>
 </head>
-<body class="min-h-screen bg-grid text-nexus-textBright text-sm antialiased selection:bg-nexus-cyan selection:text-nexus-bg overflow-x-hidden">
+<body class="loading min-h-screen bg-grid text-nexus-textBright text-sm antialiased selection:bg-nexus-cyan selection:text-nexus-bg overflow-x-hidden">
 
-
+<!-- BEGIN: Preloader -->
+<div id="preloader">
+  <div class="loader-logo glitch-hover">AEGIS NEXUS</div>
+  <div class="loader-bar-track"><div class="loader-bar-fill" id="loaderFill"></div></div>
+  <div class="loader-status" id="loaderStatus">INITIALIZING SWARM UPLINK...</div>
+</div>
+<!-- END: Preloader -->
 
 <!-- BEGIN: Rotate device prompt -->
 <div id="rotatePrompt">
   <svg class="w-12 h-12 text-nexus-cyan rotate-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
   <p class="font-mono text-xs tracking-widest text-white uppercase">Rotate your device</p>
-  <p class="font-mono text-[10px] text-nexus-text tracking-wide max-w-xs">SYNAPSE is optimized for landscape orientation on mobile.</p>
+  <p class="font-mono text-[10px] text-nexus-text tracking-wide max-w-xs">Aegis Nexus is optimized for landscape orientation on mobile.</p>
 </div>
 <!-- END: Rotate device prompt -->
 
@@ -352,7 +357,7 @@ body.loading { overflow:hidden; }
 </svg>
 </div>
 <div>
-<h1 class="text-white font-bold tracking-[0.06em] leading-none glitch-hover text-base">SYNAPSE <span class="text-nexus-magenta">2148</span></h1>
+<h1 class="text-white font-bold tracking-[0.06em] leading-none glitch-hover text-base">AEGIS <span class="text-nexus-magenta">NEXUS</span></h1>
 <p class="text-[10px] text-nexus-text/80 font-serif italic tracking-wide mt-1">AI Agent Swarm Control Center</p>
 </div>
 </div>
@@ -379,7 +384,7 @@ body.loading { overflow:hidden; }
 
 <!-- BEGIN: Hero Section (full-screen video) -->
 <section class="relative h-screen w-full overflow-hidden">
-  <video autoplay loop muted playsinline preload="auto" fetchpriority="high" class="absolute inset-0 w-full h-full object-cover">
+  <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover">
     <source src="assets/space.mp4" type="video/mp4">
   </video>
   <div class="absolute inset-0 bg-nexus-bg/60"></div>
@@ -421,21 +426,10 @@ body.loading { overflow:hidden; }
 
 <!-- Mission Parameters -->
 <section class="cyber-panel rounded-2xl p-6 reveal">
-  <div class="space-y-4">
+  <div class="space-y-2">
     <h4 class="text-[11px] font-mono font-bold tracking-[0.1em] text-nexus-magenta uppercase flex items-center gap-2">
       <span class="w-1.5 h-1.5 bg-nexus-magenta rounded-full live-dot"></span>MISSION PARAMETERS
     </h4>
-
-    <div class="border-t border-nexus-border/40"></div>
-
-    <div class="space-y-2">
-      <h5 class="text-xs font-mono font-bold tracking-[0.14em] text-nexus-cyan uppercase">Mission Overview</h5>
-      <p class="text-sm text-nexus-text leading-relaxed opacity-70">The <span class="kw-highlight">SYNAPSE</span> network has detected a breakdown in autonomous consensus across multiple planetary AI systems. Individually rational decisions are now competing for shared resources, threatening the stability of the <span class="kw-highlight">Stellar Federation</span>.</p>
-      <p class="text-sm text-nexus-text leading-relaxed opacity-70">Your mission is to <span class="kw-highlight">monitor</span> these systems, understand the cause of conflicts, <span class="kw-highlight">simulate</span> potential outcomes, and <span class="kw-highlight">authorize strategic interventions</span> before localized incidents escalate into interstellar crises.</p>
-    </div>
-
-    <div class="border-t border-nexus-border/40"></div>
-
     <p class="text-sm text-nexus-text leading-relaxed opacity-70">Initializing tactical oversight protocol. Synchronizing neural agent swarms across all seven primary districts. Current mission parameters focus on <span class="kw-highlight">grid stability</span> and <span class="kw-highlight">predictive conflict mitigation</span> within the central AI core corridor. Monitor swarm latency and system health for real-time adjustments. All tactical nodes are currently reporting <span class="kw-highlight">nominal throughput</span>, though localized variance in the tertiary processing clusters suggests a potential <span class="kw-highlight">bottleneck</span> in the upcoming simulation cycle.</p>
   </div>
 </section>
@@ -688,15 +682,11 @@ RUN SIMULATION <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0
 </button>
 </section>
 
-<!-- Synapse Copilot -->
+<!-- Aegis Copilot -->
 <section class="cyber-panel rounded-2xl p-6 flex flex-col border-nexus-cyan/50 lg:col-span-1 relative overflow-hidden reveal reveal-delay-2">
-<video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none" style="z-index:0">
-  <source src="assets/clips/robot.mp4" type="video/mp4">
-</video>
-<div class="absolute inset-0 bg-gradient-to-t from-nexus-bg/90 via-nexus-bg/60 to-nexus-bg/40 pointer-events-none" style="z-index:1"></div>
-<div class="absolute -right-10 -top-10 w-32 h-32 bg-nexus-cyan/10 rounded-full blur-2xl" style="z-index:2"></div>
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-nexus-cyan/10 rounded-full blur-2xl"></div>
 <h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">AI ASSISTANT</h3>
-<p class="font-bold text-white text-lg tracking-wide mb-6">SYNAPSE COPILOT</p>
+<p class="font-bold text-white text-lg tracking-wide mb-6">AEGIS COPILOT</p>
 <div class="flex-1 flex flex-col items-center justify-center">
 <div class="w-20 h-20 rounded-full border border-nexus-cyan/30 flex items-center justify-center mb-4 relative">
 <div class="absolute inset-0 border border-nexus-cyan rounded-full border-t-transparent" style="animation: spinSlow 4s linear infinite"></div>
@@ -713,7 +703,7 @@ RUN SIMULATION <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0
 <p class="text-xs text-nexus-text text-center italic mb-4 min-h-[32px]" id="copilotSays">"All systems operational. How can I assist you today, Operator?"</p>
 </div>
 <button class="w-full border border-nexus-cyan/50 text-nexus-cyan hover:bg-nexus-cyan/10 py-2 rounded text-xs font-mono tracking-widest flex items-center justify-center gap-2 transition-colors">
-ASK SYNAPSE <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+ASK AEGIS <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
 </button>
 </section>
 </div>
@@ -773,7 +763,7 @@ Broadcast System Alert
 <div class="w-6 h-6 rounded border border-nexus-magenta flex items-center justify-center">
 <svg class="w-4 h-4 text-nexus-magenta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
 </div>
-<div><span class="text-white font-bold tracking-wider block leading-tight">SYNAPSE</span><span class="text-[9px] uppercase tracking-widest font-mono">Control Center</span></div>
+<div><span class="text-white font-bold tracking-wider block leading-tight">AEGIS NEXUS</span><span class="text-[9px] uppercase tracking-widest font-mono">Control Center</span></div>
 </div>
 </div>
 <div>
@@ -790,7 +780,7 @@ Broadcast System Alert
 <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-nexus-cyan shadow-neon-cyan"></div><span>Uptime: <span id="uptime">99.96</span>%</span></div>
 </div>
 </div>
-<div class="max-w-[1600px] mx-auto mt-8 pt-4 border-t border-nexus-border/30 text-center font-mono text-[10px]">© 2148 SYNAPSE. All rights reserved.</div>
+<div class="max-w-[1600px] mx-auto mt-8 pt-4 border-t border-nexus-border/30 text-center font-mono text-[10px]">© 2148 Aegis Nexus. All rights reserved.</div>
 </footer>
 
 <div id="toastStack"></div>
@@ -803,7 +793,31 @@ const rand = (a,b) => a + Math.random()*(b-a);
 const randInt = (a,b) => Math.floor(rand(a,b+1));
 function flash(el){ el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); }
 
-
+/* ============ PRELOADER ============ */
+(function(){
+  const fill = $('loaderFill'), status = $('loaderStatus'), loader = $('preloader');
+  const messages = ['INITIALIZING SWARM UPLINK...','SYNCING NEURAL MESH...','CALIBRATING SENSORS...','LOADING CITY GRID...','READY'];
+  let pct = 0, mi = 0;
+  const timer = setInterval(() => {
+    pct += rand(6, 16);
+    if(pct >= 100){
+      pct = 100;
+      clearInterval(timer);
+      status.textContent = messages[messages.length - 1];
+      fill.style.width = '100%';
+      setTimeout(() => {
+        loader.classList.add('loader-hide');
+        document.body.classList.remove('loading');
+      }, 350);
+      return;
+    }
+    fill.style.width = pct + '%';
+    mi = Math.min(messages.length - 2, Math.floor(pct / 25));
+    status.textContent = messages[mi];
+  }, 220);
+  /* safety net: never trap the user behind the preloader */
+  setTimeout(() => { loader.classList.add('loader-hide'); document.body.classList.remove('loading'); }, 4000);
+})();
 
 /* ============ ROTATE-DEVICE PROMPT ============ */
 (function(){
@@ -913,8 +927,8 @@ function agentCardHTML(a, i, copy){
          style="--oy:${pose.y}px; --rot:${pose.r}deg; --bob-delay:${(i*0.9).toFixed(1)}s">
       <div class="agent-inner flex flex-col h-full">
         <div class="agent-clip relative w-full h-36 overflow-hidden rounded-t-2xl border-b border-nexus-border/30">
-          <video muted loop playsinline preload="none" class="lazy-clip w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500">
-            <source data-src="assets/clips/${a.id}.mp4" type="video/mp4">
+          <video muted loop playsinline preload="metadata" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500">
+            <source src="assets/clips/${a.id}.mp4" type="video/mp4">
           </video>
           <div class="absolute inset-0 bg-gradient-to-t from-[#0A0B1F] via-transparent to-transparent pointer-events-none"></div>
           <div class="absolute top-2 left-2 flex items-center gap-1.5 font-mono text-[8px] tracking-widest px-1.5 py-0.5 rounded bg-nexus-bg/70 border border-nexus-border/40" style="color:${colorMap[a.color]}">
@@ -946,27 +960,6 @@ function renderAgents(){
   const setA = agents.map((a,i) => agentCardHTML(a, i, false)).join('');
   const setB = agents.map((a,i) => agentCardHTML(a, i, true)).join('');
   $('agentGrid').innerHTML = setA + setB;
-
-  /* Lazy-load clip videos only as they scroll near viewport — avoids
-     firing 12 simultaneous video downloads on page load, which was
-     competing with the hero video for bandwidth. */
-  const lazyVideos = document.querySelectorAll('video.lazy-clip');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const video = entry.target;
-        const source = video.querySelector('source[data-src]');
-        if (source) {
-          source.src = source.dataset.src;
-          source.removeAttribute('data-src');
-          video.load();
-          video.play().catch(() => {});
-        }
-        io.unobserve(video);
-      }
-    });
-  }, { rootMargin: '200px 400px' });
-  lazyVideos.forEach(v => io.observe(v));
 }
 renderAgents();
 
