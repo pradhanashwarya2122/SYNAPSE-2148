@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SYNAPSE — When AI Disagrees, Humanity Decides</title>
   
-  <!-- PRELOAD the hero video at top priority -->
+  <!-- PRELOAD hero video with high priority & cross-origin support -->
   <link rel="preload" as="video" href="C:\Users\Hp\SYNAPSE-2148\assets\spaceship.mp4" type="video/mp4" fetchpriority="high">
+  <!-- Also preconnect to the file origin (local file system) -->
+  <link rel="preconnect" href="file:///C:/Users/Hp/SYNAPSE-2148/assets/">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,7 +45,7 @@
       * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
 
-    /* === video layer – with preload & fetchpriority === */
+    /* === video layer – with robust loading strategy === */
     .video-layer {
       position: fixed;
       inset: 0;
@@ -51,6 +53,7 @@
       height: 100%;
       z-index: -3;
       overflow: hidden;
+      background: var(--void); /* fallback color while video loads */
     }
 
     .video-layer video {
@@ -64,6 +67,25 @@
       transform: translate(-50%, -50%);
       object-fit: cover;
       filter: saturate(0.75) brightness(0.55);
+      /* These attributes ensure the video loads and plays even on slower connections */
+      preload: auto;
+      autoplay: true;
+      muted: true;
+      loop: true;
+      playsinline: true;
+    }
+
+    /* Fallback: if video fails, show a gradient */
+    .video-layer .fallback-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, #1a1a1e 0%, #0a0a0c 100%);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    .video-layer .fallback-bg.active {
+      opacity: 1;
     }
 
     .video-overlay {
@@ -289,10 +311,26 @@
   <!-- ===== LOADER – removed ===== -->
   <div id="loader" style="display:none;"></div>
 
-  <!-- ===== VIDEO LAYER – with preload="auto" and fetchpriority="high" ===== -->
-  <div class="video-layer">
-    <video autoplay muted loop playsinline preload="auto" fetchpriority="high">
+  <!-- ===== VIDEO LAYER – with robust loading & fallback ===== -->
+  <div class="video-layer" id="videoLayer">
+    <!-- Fallback background shown if video fails -->
+    <div class="fallback-bg" id="fallbackBg"></div>
+    
+    <!-- Primary video with all optimizations -->
+    <video 
+      id="heroVideo"
+      autoplay 
+      muted 
+      loop 
+      playsinline 
+      preload="auto" 
+      fetchpriority="high"
+      disablePictureInPicture
+      crossorigin="anonymous"
+    >
       <source src="C:\Users\Hp\SYNAPSE-2148\assets\spaceship.mp4" type="video/mp4">
+      <!-- Fallback: if the primary source fails, try an alternative (if available) -->
+      <source src="spaceship.mp4" type="video/mp4">
     </video>
   </div>
   <div class="video-overlay"></div>
@@ -319,7 +357,7 @@
     <section class="beat" id="beat-6"><div class="beat-inner"><div class="beat-text pivot">Until today.</div></div></section>
     <section class="beat" id="beat-7"><div class="beat-inner"><div class="beat-eyebrow">Live Alert · Consensus Engine</div><div class="synapse-mark" style="margin-bottom: 22px;"><svg class="orbit-ring critical" viewBox="0 0 54 54"><circle class="core" cx="27" cy="27" r="4"></circle><circle cx="27" cy="27" r="24"></circle></svg></div><div class="beat-text large">Somewhere among 2.6 billion AI agents, consensus is breaking.</div></div></section>
     
-    <!-- ===== BEAT 8: agent cards removed ===== -->
+    <!-- ===== BEAT 8 ===== -->
     <section class="beat" id="beat-8">
       <div class="beat-inner">
         <div class="beat-text large">And humanity must decide what happens next.</div>
@@ -333,6 +371,56 @@
   <div class="advance-cue" id="advance-cue">Click to continue</div>
 
   <script>
+    // =========================================================
+    // VIDEO LOADING STRATEGY — ensures video plays at any quality
+    // =========================================================
+    (function ensureVideoLoads() {
+      const video = document.getElementById('heroVideo');
+      const fallback = document.getElementById('fallbackBg');
+      
+      if (!video) return;
+
+      // Force load even if browser tries to be lazy
+      video.load();
+
+      // If video fails to load, show fallback background
+      video.addEventListener('error', function(e) {
+        console.warn('Hero video failed to load, showing fallback background.');
+        fallback.classList.add('active');
+        // Try reloading with a lower-quality approach (just in case)
+        setTimeout(() => {
+          video.load();
+        }, 2000);
+      });
+
+      // If video takes too long to load (5+ seconds), show fallback
+      let loadTimer = setTimeout(() => {
+        if (!video.currentTime || video.readyState < 2) {
+          fallback.classList.add('active');
+        }
+      }, 5000);
+
+      video.addEventListener('canplay', function() {
+        clearTimeout(loadTimer);
+        fallback.classList.remove('active');
+        // Ensure it plays
+        video.play().catch(() => {});
+      });
+
+      // Also try to play on any user interaction (helps with autoplay policies)
+      document.addEventListener('click', function tryPlay() {
+        if (video.paused) {
+          video.play().catch(() => {});
+        }
+        document.removeEventListener('click', tryPlay);
+      }, { once: true });
+
+      // If video is already playing, hide fallback
+      if (video.currentTime > 0 || video.readyState >= 2) {
+        fallback.classList.remove('active');
+      }
+    })();
+
     // =========================================================
     // CONFIG
     // =========================================================
