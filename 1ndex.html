@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYNAPSE — When AI Disagrees, Humanity Decides</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #0a0a0c;
+    --panel: #111114;
+    --hairline: rgba(244,243,239,0.10);
+    --hairline-strong: rgba(244,243,239,0.22);
+    --ink: #f4f3ef;
+    --ink-dim: #93939b;
+    --ink-faint: #5c5c63;
+    --gold: #c9a867;
+    --alert: #b5493c;
+    --font-display: 'Instrument Serif', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--void);
+    color: var(--ink);
+    font-family: var(--font-body);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* ---------- BACKGROUND VIDEO ---------- */
+  .video-layer {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -3;
+    overflow: hidden;
+  }
+
+  .video-layer video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    filter: saturate(0.75) brightness(0.55);
+    /* Insert your looping premise video as the src of the <video> tag below.
+       Recommended: 1920x1080+, muted, 15-30s seamless loop, restrained/cinematic footage. */
+  }
+
+  .video-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(10,10,12,0.2) 0%, rgba(10,10,12,0.72) 55%, rgba(10,10,12,0.96) 100%),
+      linear-gradient(180deg, rgba(10,10,12,0.82) 0%, rgba(10,10,12,0.5) 15%, rgba(10,10,12,0.5) 85%, rgba(10,10,12,0.94) 100%);
+    pointer-events: none;
+  }
+
+  /* subtle film grain, premium not decorative */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.035;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- LOADER ---------- */
+  #loader {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--void);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    transition: opacity 0.9s ease, visibility 0.9s ease;
+  }
+
+  #loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .loader-line {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--ink-dim);
+    opacity: 0;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .loader-bar-track {
+    width: min(220px, 60vw);
+    height: 1px;
+    background: var(--hairline);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .loader-bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0%;
+    background: var(--gold);
+    animation: fillBar 4.2s ease forwards;
+  }
+
+  @keyframes fillBar { to { width: 100%; } }
+
+  .skip-loader {
+    position: absolute;
+    bottom: 28px;
+    right: 28px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    background: none;
+    border: 1px solid var(--hairline);
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease;
+  }
+  .skip-loader:hover { color: var(--ink); border-color: var(--hairline-strong); }
+
+  /* ---------- HUD STATUS BAR ---------- */
+  .hud {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px clamp(20px, 4vw, 56px);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    pointer-events: none;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .hud-brand {
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    font-size: 12px;
+  }
+
+  .hud-metric {
+    display: flex;
+    gap: 7px;
+    align-items: baseline;
+  }
+
+  .hud-metric .value {
+    color: var(--ink-dim);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.6s ease;
+  }
+
+  .hud-metric.alert .value {
+    color: var(--alert);
+  }
+
+  .hud-metrics {
+    display: flex;
+    gap: clamp(18px, 3vw, 36px);
+  }
+
+  @media (max-width: 640px) {
+    .hud-metrics { display: none; }
+  }
+
+  /* ---------- CLICK-TO-ADVANCE STAGE ---------- */
+  .story {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    width: 100vw;
+    cursor: pointer;
+  }
+
+  .beat {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    pointer-events: none;
+  }
+
+  .beat-inner {
+    max-width: 760px;
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.9s cubic-bezier(0.16,1,0.3,1),
+      transform 0.9s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  .beat.active {
+    pointer-events: auto;
+  }
+  .beat.active .beat-inner {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .beat.exit-up .beat-inner {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+
+  .beat-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    opacity: 0.9;
+  }
+
+  .beat-text {
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+
+  .beat-text.huge {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(46px, 8vw, 96px);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  .beat-text.large {
+    font-family: var(--font-body);
+    font-size: clamp(22px, 3.2vw, 34px);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+  .beat-text.medium {
+    font-family: var(--font-body);
+    font-size: clamp(17px, 2vw, 21px);
+    font-weight: 400;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  .beat-text.pivot {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(38px, 6vw, 68px);
+    font-weight: 400;
+    color: var(--ink);
+  }
+
+  /* Beat 3: data row — hairline dividers, no cards, no color-pop */
+  .data-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 40px;
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .datum {
+    font-family: var(--font-mono);
+    padding: 20px clamp(22px, 4vw, 40px);
+    border-left: 1px solid var(--hairline);
+  }
+  .datum:first-child { border-left: none; }
+
+  .datum .num {
+    display: block;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(26px, 3vw, 36px);
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  .datum .label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  /* Beat 4: SYNAPSE reveal with orbit ring, not a glowing blob */
+  .synapse-mark {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+    justify-content: center;
+  }
+
+  .orbit-ring {
+    width: 54px;
+    height: 54px;
+    animation: spin 14s linear infinite;
+  }
+  .orbit-ring circle {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 1;
+    stroke-dasharray: 3 7;
+    opacity: 0.75;
+  }
+  .orbit-ring .core {
+    stroke-dasharray: none;
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+    opacity: 0.4;
+  }
+  .orbit-ring.critical circle { stroke: var(--alert); }
+  .orbit-ring.critical { animation-duration: 4.5s; }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .wordmark {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: clamp(40px, 7vw, 72px);
+    letter-spacing: 0.06em;
+  }
+
+  /* Beat 8 — CTA handoff */
+  .cta-button {
+    margin-top: 40px;
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--void);
+    background: var(--ink);
+    border: none;
+    border-radius: 2px;
+    padding: 16px 36px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, background 0.3s ease;
+    position: relative;
+    z-index: 5;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.45);
+    background: var(--gold);
+  }
+
+  /* ---------- NAV: progress lines ---------- */
+  .nav-dots {
+    position: fixed;
+    right: clamp(16px, 3vw, 44px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .nav-dot {
+    width: 1px;
+    height: 16px;
+    background: var(--hairline-strong);
+    transition: background 0.5s ease, height 0.5s ease;
+    cursor: pointer;
+  }
+
+  .nav-dot.active {
+    background: var(--gold);
+    height: 26px;
+  }
+
+  .advance-cue {
+    position: fixed;
+    bottom: 34px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.8;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .advance-cue.hide { opacity: 0; }
+
+  .advance-cue::after {
+    content: '';
+    width: 1px;
+    height: 20px;
+    background: var(--hairline-strong);
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ LOADER ============ -->
+  <div id="loader">
+    <div class="loader-line" id="load-1">Initializing Synapse</div>
+    <div class="loader-bar-track"><div class="loader-bar-fill"></div></div>
+    <button class="skip-loader" id="skip-btn">Skip</button>
+  </div>
+
+  <!-- ============ BACKGROUND VIDEO (looped) ============ -->
+  <div class="video-layer">
+    <!-- Replace src below with your premise video file -->
+    <video autoplay muted loop playsinline>
+      <source src="your-video-file.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-overlay"></div>
+  <div class="grain"></div>
+
+  <!-- ============ HUD ============ -->
+  <div class="hud">
+    <div class="hud-brand">SYNAPSE</div>
+    <div class="hud-metrics">
+      <div class="hud-metric" id="metric-harmony">
+        <span>Harmony</span><span class="value">96.2%</span>
+      </div>
+      <div class="hud-metric">
+        <span>Worlds</span><span class="value">47</span>
+      </div>
+      <div class="hud-metric" id="metric-incidents">
+        <span>Incidents</span><span class="value">00</span>
+      </div>
+      <div class="hud-metric">
+        <span>Sync</span><span class="value" id="sync-clock">00:00:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CLICK-TO-ADVANCE STORY ============ -->
+  <main class="story" id="story">
+
+    <section class="beat" id="beat-1">
+      <div class="beat-inner">
+        <div class="beat-eyebrow">Transmission Log · 00:01</div>
+        <div class="beat-text huge">Year 2148.</div>
+      </div>
+    </section>
+
+    <section class="beat" id="beat-2">
+      <div class="beat-inner">
+        <div class="beat-text large">Humanity no longer governs its worlds alone.</div>
+      </div>
+    </section>
+
+    <section class="beat" id="beat-3">
+      <div class="beat-inner">
+        <div class="beat-eyebrow">The Federation</div>
+        <div class="beat-text large">Across 47 inhabited systems, autonomous AI agents manage energy, healthcare, transport, and life-support.</div>
+        <div class="data-row">
+          <div class="datum"><span class="num">47</span><span class="label">Worlds</span></div>
+          <div class="datum"><span class="num">2.6B</span><span class="label">AI Agents</span></div>
+          <div class="datum"><span class="num">5</span><span class="label">Critical Systems</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="beat" id="beat-4">
+      <div class="beat-inner">
+        <div class="beat-eyebrow">One Network Binds Them</div>
+        <div class="synapse-mark">
+          <svg class="orbit-ring" viewBox="0 0 54 54">
+            <circle class="core" cx="27" cy="27" r="4"></circle>
+            <circle cx="27" cy="27" r="24"></circle>
+          </svg>
+          <span class="wordmark">SYNAPSE</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="beat" id="beat-5">
+      <div class="beat-inner">
+        <div class="beat-text medium">For decades, it has kept the Federation in perfect balance.</div>
+      </div>
+    </section>
+
+    <section class="beat" id="beat-6">
+      <div class="beat-inner">
+        <div class="beat-text pivot">Until today.</div>
+      </div>
+    </section>
+
+    <section class="beat" id="beat-7">
+      <div class="beat-inner">
+        <div class="beat-eyebrow">Live Alert · Consensus Engine</div>
+        <div class="synapse-mark" style="margin-bottom: 22px;">
+          <svg class="orbit-ring critical" viewBox="0 0 54 54">
+            <circle class="core" cx="27" cy="27" r="4"></circle>
+            <circle cx="27" cy="27" r="24"></circle>
+          </svg>
+        </div>
+        <div class="beat-text large">Somewhere among 2.6 billion AI agents, consensus is breaking.</div>
+      </div>
+    </section>
+
+    <section class="beat" id="beat-8">
+      <div class="beat-inner">
+        <div class="beat-text large">And humanity must decide what happens next.</div>
+        <!-- This button navigates to REDIRECT_URL, set in the script below. -->
+        <a href="#" class="cta-button" id="cta-btn">Begin Mission →</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Progress markers, one per slide -->
+  <div class="nav-dots" id="nav-dots"></div>
+
+  <div class="advance-cue" id="advance-cue">Click to continue</div>
+
+  <script>
+    // =========================================================
+    // CONFIG — set where "Begin Mission" should send the user
+    // =========================================================
+    const REDIRECT_URL = "aegis-hyperlane.html"; // <-- replace with your destination URL
+
+    // ---------- Loader sequence ----------
+    const loaderLines = [
+      { text: "Initializing Synapse" },
+      { text: "Connecting 47 worlds" },
+      { text: "Synchronizing AI swarm" },
+      { text: "Consensus architect authenticated" }
+    ];
+
+    const loadLineEl = document.getElementById('load-1');
+    const loader = document.getElementById('loader');
+    const skipBtn = document.getElementById('skip-btn');
+
+    let lineIndex = 0;
+    function cycleLoaderText() {
+      if (lineIndex >= loaderLines.length) return;
+      loadLineEl.style.transition = 'opacity 0.4s ease';
+      loadLineEl.style.opacity = 0;
+      setTimeout(() => {
+        loadLineEl.textContent = loaderLines[lineIndex].text;
+        loadLineEl.style.opacity = 1;
+        lineIndex++;
+        if (lineIndex < loaderLines.length) {
+          setTimeout(cycleLoaderText, 1000);
+        }
+      }, 400);
+    }
+    setTimeout(() => { loadLineEl.style.opacity = 1; cycleLoaderText(); }, 100);
+
+    function dismissLoader() {
+      loader.classList.add('hidden');
+    }
+    setTimeout(dismissLoader, 4400);
+    skipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismissLoader();
+    });
+
+    // ---------- Click-to-advance slide engine ----------
+    const beats = Array.from(document.querySelectorAll('.beat'));
+    const total = beats.length;
+    let current = 0;
+    let animating = false;
+
+    const navDotsContainer = document.getElementById('nav-dots');
+    const advanceCue = document.getElementById('advance-cue');
+
+    beats.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'nav-dot';
+      dot.dataset.index = i;
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (i === current || animating) return;
+        goTo(i);
+      });
+      navDotsContainer.appendChild(dot);
+    });
+    const dots = Array.from(navDotsContainer.children);
+
+    // HUD elements
+    const harmonyValue = document.querySelector('#metric-harmony .value');
+    const harmonyMetric = document.getElementById('metric-harmony');
+    const incidentsValue = document.querySelector('#metric-incidents .value');
+    const incidentsMetric = document.getElementById('metric-incidents');
+    const syncClock = document.getElementById('sync-clock');
+
+    function animateValue(el, start, end, duration, suffix) {
+      const startTime = performance.now();
+      function tick(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const current = (start + (end - start) * progress).toFixed(1);
+        el.textContent = current + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // ---------- Genuinely live telemetry ----------
+    // Sync clock: real elapsed session time, ticking every second — not a fake prop.
+    const sessionStart = performance.now();
+    setInterval(() => {
+      const elapsed = Math.floor((performance.now() - sessionStart) / 1000);
+      const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+      const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+      const s = String(elapsed % 60).padStart(2, '0');
+      syncClock.textContent = `${h}:${m}:${s}`;
+    }, 1000);
+
+    // Harmony index: continuously drifts by small live increments so the number
+    // is always genuinely changing, anchored around whatever baseline the story
+    // has currently set (calm vs. degraded vs. critical).
+    let harmonyBaseline = 96.2;
+    let harmonyDisplay = 96.2;
+    setInterval(() => {
+      const drift = (Math.random() - 0.5) * 0.3;
+      harmonyDisplay = Math.max(0, Math.min(100, harmonyDisplay + drift));
+      // pull gently back toward the baseline so it wanders, not walks away
+      harmonyDisplay += (harmonyBaseline - harmonyDisplay) * 0.15;
+      harmonyValue.textContent = harmonyDisplay.toFixed(1) + '%';
+    }, 1400);
+
+    let harmonyStage = 0; // 0 = calm, 1 = beat-6 dip, 2 = beat-7 crisis
+
+    function syncHudToSlide(index) {
+      const id = beats[index].id;
+
+      if (id === 'beat-6' && harmonyStage < 1) {
+        harmonyStage = 1;
+        harmonyBaseline = 78.4;
+      }
+      if (id === 'beat-7' && harmonyStage < 2) {
+        harmonyStage = 2;
+        harmonyBaseline = 61.7;
+        harmonyMetric.classList.add('alert');
+        incidentsValue.textContent = '03';
+        incidentsMetric.classList.add('alert');
+      }
+      if (id === 'beat-8') {
+        harmonyMetric.classList.remove('alert');
+      }
+      if ((id === 'beat-1' || id === 'beat-2' || id === 'beat-3' || id === 'beat-4' || id === 'beat-5') && harmonyStage > 0) {
+        harmonyStage = 0;
+        harmonyBaseline = 96.2;
+        harmonyMetric.classList.remove('alert');
+        incidentsValue.textContent = '00';
+        incidentsMetric.classList.remove('alert');
+      }
+    }
+
+    function render(index) {
+      beats.forEach((beat, i) => {
+        beat.classList.remove('active', 'exit-up');
+        if (i === index) {
+          beat.classList.add('active');
+        } else if (i < index) {
+          beat.classList.add('exit-up');
+        }
+      });
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+      advanceCue.classList.toggle('hide', index === total - 1);
+      syncHudToSlide(index);
+    }
+
+    function goTo(index) {
+      if (index < 0 || index >= total || animating) return;
+      animating = true;
+      current = index;
+      render(current);
+      setTimeout(() => { animating = false; }, 500);
+    }
+
+    function next() {
+      if (current < total - 1) goTo(current + 1);
+    }
+    function prev() {
+      if (current > 0) goTo(current - 1);
+    }
+
+    beats[0].classList.add('active');
+    dots[0].classList.add('active');
+
+    // ---------- Input handling ----------
+    const stage = document.getElementById('story');
+
+    stage.addEventListener('click', (e) => {
+      if (e.target.closest('.cta-button')) return;
+      const x = e.clientX;
+      const w = window.innerWidth;
+      if (x < w * 0.3 && current > 0) {
+        prev();
+      } else {
+        next();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) {
+        e.preventDefault();
+        next();
+      } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
+        e.preventDefault();
+        prev();
+      }
+    });
+
+    let touchStartX = 0, touchStartY = 0;
+    stage.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    stage.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      const dy = e.changedTouches[0].screenY - touchStartY;
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+      if (dx < 0) next(); else prev();
+    }, { passive: true });
+
+    let wheelLocked = false;
+    stage.addEventListener('wheel', (e) => {
+      if (wheelLocked) return;
+      if (Math.abs(e.deltaY) < 12) return;
+      wheelLocked = true;
+      if (e.deltaY > 0) next(); else prev();
+      setTimeout(() => { wheelLocked = false; }, 650);
+    }, { passive: true });
+
+    // ---------- Final CTA: redirect ----------
+    document.getElementById('cta-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      document.getElementById('cta-btn').style.opacity = '0.7';
+      setTimeout(() => {
+        window.location.href = REDIRECT_URL;
+      }, 200);
+    });
+  </script>
+
+</body>
+</html>
