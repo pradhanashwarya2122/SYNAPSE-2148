@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>City Agent Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #050816;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif;
+    overflow: hidden;
+  }
+
+  .scene-wrap {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .stage {
+    position: relative;
+    width: 1400px;
+    max-width: 97vw;
+    aspect-ratio: 1400 / 1050;
+    border-radius: 20px;
+    overflow: hidden;
+    background: radial-gradient(120% 100% at 50% 8%, #0d1330 0%, #070a1a 45%, #030309 100%);
+    box-shadow: 0 60px 140px rgba(0,0,0,0.65), 0 0 0 1px rgba(63,169,255,0.08);
+  }
+
+  canvas#stars { position: absolute; inset: 0; width: 100%; height: 100%; }
+  svg#city { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+  @keyframes ringPulse {
+    0%   { transform: scale(0.55); opacity: 0.9; }
+    100% { transform: scale(1.9);  opacity: 0; }
+  }
+  @keyframes hubSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes hubSpinRev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+  @keyframes floatIcon { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes twinkle { 0%,100% { opacity: 0.15; } 50% { opacity: 0.9; } }
+
+  .pulse-ring { transform-origin: center; animation: ringPulse 2.6s ease-out infinite; }
+  .hub-ring-a { transform-origin: 700px 660px; animation: hubSpin 22s linear infinite; }
+  .hub-ring-b { transform-origin: 700px 660px; animation: hubSpinRev 30s linear infinite; }
+  .icon-float { animation: floatIcon 3.4s ease-in-out infinite; }
+  .star { animation: twinkle linear infinite; }
+
+  /* ---- per-component 3D hover tilt ---- */
+  .tilt-3d {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.35s cubic-bezier(.2,.8,.25,1.15), opacity 0.3s ease, filter 0.3s ease;
+    cursor: pointer;
+  }
+  .tilt-3d.dimmed { opacity: 0.4; }
+  .tilt-3d.hovered { filter: drop-shadow(0 14px 22px rgba(0,0,0,0.55)); }
+
+  .beam-line, .beam-spark { transition: stroke-width 0.3s ease, stroke-opacity 0.3s ease, opacity 0.3s ease; }
+  .beam-line.dimmed, .beam-spark.dimmed { opacity: 0.18; }
+  .beam-line.active { stroke-width: 3; stroke-opacity: 1; }
+
+  .cam-tooltip {
+    position: fixed; z-index: 50; pointer-events: none;
+    min-width: 190px; padding: 12px 14px; border-radius: 12px;
+    background: rgba(7,10,24,0.88); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03);
+    opacity: 0; transform: translate(14px, 14px) scale(0.94);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .cam-tooltip.visible { opacity: 1; transform: translate(14px, 14px) scale(1); }
+  .cam-tooltip .tt-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .cam-tooltip .tt-dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px 2px currentColor; }
+  .cam-tooltip .tt-title { font-size: 12px; letter-spacing: 0.14em; font-weight: 600; color: #f2f6ff; }
+  .cam-tooltip .tt-row { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.04em; color: rgba(200,215,255,0.65); margin-top: 4px; }
+  .cam-tooltip .tt-row b { color: rgba(230,240,255,0.95); font-weight: 500; }
+
+  .spotlight {
+    position: absolute; inset: 0; pointer-events: none; z-index: 4;
+    opacity: 0; transition: opacity 0.3s ease;
+    background: radial-gradient(220px 220px at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.06), transparent 70%);
+  }
+  .spotlight.on { opacity: 1; }
+
+  .vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(70% 65% at 50% 55%, transparent 45%, rgba(2,2,8,0.72) 100%);
+  }
+</style>
+</head>
+<body>
+<div class="scene-wrap" id="sceneWrap">
+  <div class="stage" id="stage">
+    <canvas id="stars"></canvas>
+
+    <svg id="city" viewBox="0 0 1400 1050" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="spotlight" id="spotlight"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <div class="cam-tooltip" id="tooltip"></div>
+</div>
+
+<script>
+const svgns = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('city');
+const defs = document.createElementNS(svgns, 'defs');
+svg.appendChild(defs);
+
+/* ---------------- starfield canvas (with occasional comet) ---------------- */
+const cv = document.getElementById('stars');
+const ctx = cv.getContext('2d');
+const W = 1400, H = 1050;
+cv.width = W; cv.height = H;
+function rnd(seed){ let s = seed; return () => { s |= 0; s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s>>>15), 1 | s); t = (t + Math.imul(t ^ (t>>>7), 61 | t)) ^ t; return ((t ^ (t>>>14))>>>0) / 4294967296; }; }
+const R = rnd(11);
+const grad = ctx.createRadialGradient(W*0.5, H*0.15, 60, W*0.5, H*0.55, 950);
+grad.addColorStop(0, '#111a3a'); grad.addColorStop(0.5, '#080b1e'); grad.addColorStop(1, '#020208');
+
+let starPts = [];
+for (let i=0;i<340;i++){
+  starPts.push({ x: R()*W, y: R()*H, r: R()*1.3+0.2, o: R()*0.7+0.1 });
+}
+
+function drawBaseSky(){
+  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+  starPts.forEach(p => {
+    ctx.beginPath(); ctx.fillStyle = `rgba(200,215,255,${p.o})`; ctx.arc(p.x,p.y,p.r,0,7); ctx.fill();
+  });
+  ctx.strokeStyle = 'rgba(100,140,255,0.045)';
+  for (let gx=0; gx<=W; gx+=50){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke(); }
+  for (let gy=0; gy<=H; gy+=50){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); }
+}
+drawBaseSky();
+
+/* comet / shooting star flair, replays occasionally */
+let comet = null;
+function spawnComet(){
+  const fromLeft = Math.random() < 0.5;
+  comet = {
+    x: fromLeft ? -50 : W+50,
+    y: 60 + Math.random()*260,
+    vx: (fromLeft ? 1 : -1) * (6 + Math.random()*3),
+    vy: 2.2 + Math.random()*1.4,
+    life: 0
+  };
+}
+function tickComet(){
+  drawBaseSky();
+  if (comet){
+    comet.x += comet.vx; comet.y += comet.vy; comet.life++;
+    const tailLen = 70;
+    const tx = comet.x - Math.sign(comet.vx)*tailLen, ty = comet.y - comet.vy*(tailLen/8);
+    const g2 = ctx.createLinearGradient(comet.x, comet.y, tx, ty);
+    g2.addColorStop(0, 'rgba(255,255,255,0.95)');
+    g2.addColorStop(0.4, 'rgba(180,210,255,0.5)');
+    g2.addColorStop(1, 'rgba(180,210,255,0)');
+    ctx.strokeStyle = g2; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(comet.x, comet.y); ctx.lineTo(tx, ty); ctx.stroke();
+    ctx.beginPath(); ctx.fillStyle = '#fff'; ctx.arc(comet.x, comet.y, 1.8, 0, 7); ctx.fill();
+    if (comet.x < -120 || comet.x > W+120 || comet.y > H+120) comet = null;
+  }
+  requestAnimationFrame(tickComet);
+}
+tickComet();
+setInterval(() => { if (!comet && Math.random() < 0.6) spawnComet(); }, 4200);
+
+/* ---------------- iso building primitive (with lit windows) ---------------- */
+function isoBuilding(cx, cy, s, h, hex, seed){
+  const top = { r: shade(hex, 0.35), l: shade(hex, -0.1), rgt: shade(hex, -0.3) };
+  const N = [cx, cy - s*0.5], E = [cx + s, cy], S = [cx, cy + s*0.5], Wp = [cx - s, cy];
+  const up = p => [p[0], p[1]-h];
+  const poly = (pts, fill, extra='') => `<polygon points="${pts.map(p=>p.join(',')).join(' ')}" fill="${fill}" ${extra}/>`;
+  let out = '';
+  out += poly([Wp,S,up(S),up(Wp)], top.l);
+  out += poly([S,E,up(E),up(S)], top.rgt);
+  out += poly([up(N),up(E),up(S),up(Wp)], top.r, `stroke="${hex}" stroke-width="0.6" stroke-opacity="0.55"`);
+
+  if (h > 16 && seed) {
+    const rows = Math.max(2, Math.floor(h/9));
+    const cols = 2;
+    const faces = [ { a: Wp, b: S }, { a: S, b: E } ];
+    faces.forEach(f => {
+      for (let r=0;r<rows;r++){
+        for (let c=0;c<cols;c++){
+          if (seed() < 0.42) continue;
+          const t1 = 0.22 + c*0.4;
+          const bx = f.a[0] + (f.b[0]-f.a[0])*t1;
+          const by = f.a[1] + (f.b[1]-f.a[1])*t1 - (r+0.6)*(h/rows);
+          const wOn = seed() < 0.85;
+          const wcol = wOn ? shade(hex, 0.7) : shade(hex, -0.55);
+          const op = wOn ? (0.55+seed()*0.4) : 0.25;
+          out += `<rect x="${bx-1.6}" y="${by-2.2}" width="3.2" height="4.4" fill="${wcol}" opacity="${op.toFixed(2)}"/>`;
+        }
+      }
+    });
+  }
+  return out;
+}
+function shade(hex, amt){
+  const c = hex.replace('#','');
+  let r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+  const f = amt < 0 ? (v)=>v*(1+amt) : (v)=>v+(255-v)*amt;
+  r=Math.round(f(r)); g=Math.round(f(g)); b=Math.round(f(b));
+  return `rgb(${r},${g},${b})`;
+}
+
+/* ---------------- icon library (24x24 viewbox paths) ---------------- */
+const icons = {
+  water:   '<path d="M12 3C12 3 6 10.5 6 14.5C6 18.09 8.69 21 12 21C15.31 21 18 18.09 18 14.5C18 10.5 12 3 12 3Z"/>',
+  car:     '<path d="M5 16.5V18a1 1 0 001 1h1a1 1 0 001-1v-1h8v1a1 1 0 001 1h1a1 1 0 001-1v-1.5M5 16.5l1.4-5.6A2 2 0 018.34 9.5h7.32a2 2 0 011.94 1.4L19 16.5M5 16.5h14M8 13h.01M16 13h.01" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  bolt:    '<path d="M13 2L4.5 14h6L11 22l8.5-13h-6L13 2Z"/>',
+  cross:   '<path d="M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6V4Z"/>',
+  shield:  '<path d="M12 2l7 3v6c0 5-3.5 8.5-7 11-3.5-2.5-7-6-7-11V5l7-3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  drone:   '<circle cx="12" cy="12" r="2.1"/><circle cx="5" cy="6" r="1.7"/><circle cx="19" cy="6" r="1.7"/><circle cx="5" cy="18" r="1.7"/><circle cx="19" cy="18" r="1.7"/><path d="M10.3 10.4L6.3 7.1M13.7 10.4l4-3.3M10.3 13.6l-4 3.3M13.7 13.6l4 3.3" stroke="currentColor" stroke-width="1.3" fill="none"/>',
+  warning: '<path d="M12 3.2 21.5 20H2.5L12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 9.6v5.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="17.4" r="1.05" fill="currentColor"/>'
+};
+
+/* flavor stats shown in the hover tooltip */
+const stats = {
+  water:   [['Reservoir sync', '99.4%'], ['Active sensors', '212'],  ['Latency', '18ms']],
+  car:     [['Flow index', '0.87'],      ['Signals live', '164'],    ['Latency', '9ms']],
+  bolt:    [['Grid load', '61%'],        ['Substations', '38'],      ['Latency', '11ms']],
+  drone:   [['Fleet airborne', '27'],    ['Coverage', '94%'],        ['Latency', '22ms']],
+  warning: [['Open incidents', '2'],     ['Responders', '14'],       ['Latency', '6ms']],
+  shield:  [['Threat level', 'LOW'],     ['Nodes guarded', '301'],   ['Latency', '8ms']],
+  cross:   [['Beds free', '146'],        ['Units dispatched', '5'],  ['Latency', '13ms']]
+};
+
+/* ---------------- district module (returns a real DOM node) ---------------- */
+function makeDistrict(cx, cy, hw, hh, color, key, label, thick){
+  const seed = rnd(cx*7 + cy*3 + 1);
+  const N=[cx,cy-hh], E=[cx+hw,cy], S=[cx,cy+hh], Wp=[cx-hw,cy];
+  const up = p => [p[0], p[1]+thick];
+
+  const g = document.createElementNS(svgns, 'g');
+  g.setAttribute('class', 'district-group tilt-3d');
+  g.dataset.key = key;
+  g.dataset.label = label;
+  g.dataset.color = color;
+  g.style.color = color;
+
+  let html = '';
+  html += `<polygon points="${[Wp,S,E].map(p=>up(p).join(',')).join(' ')} ${up(N).join(',')}" fill="rgba(5,8,20,0.55)"/>`;
+  html += `<polygon points="${[N,E,S,Wp].map(p=>p.join(',')).join(' ')}" fill="rgba(255,255,255,0.02)" stroke="${color}" stroke-width="1.4" stroke-opacity="0.9" filter="url(#glow)"/>`;
+
+  for (let i=0;i<3;i++){
+    const t = (i+1)/4;
+    const p1 = [Wp[0]+(N[0]-Wp[0])*t, Wp[1]+(N[1]-Wp[1])*t];
+    const p2 = [S[0]+(E[0]-S[0])*t,  S[1]+(E[1]-S[1])*t];
+    html += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${color}" stroke-opacity="0.12" stroke-width="0.8"/>`;
+    const q1 = [Wp[0]+(S[0]-Wp[0])*t, Wp[1]+(S[1]-Wp[1])*t];
+    const q2 = [N[0]+(E[0]-N[0])*t,  N[1]+(E[1]-N[1])*t];
+    html += `<line x1="${q1[0]}" y1="${q1[1]}" x2="${q2[0]}" y2="${q2[1]}" stroke="${color}" stroke-opacity="0.12" stroke-width="0.8"/>`;
+  }
+
+  const count = 18;
+  for (let i=0;i<count;i++){
+    const u = seed()*0.8+0.1, v = seed()*0.8+0.1;
+    const localX = cx + (u-0.5)*hw*1.5;
+    const localY = cy + (v-0.5)*hh*1.5;
+    const bs = 6 + seed()*7;
+    const bh = 10 + seed()*48;
+    html += isoBuilding(localX, localY - thick, bs, bh, color, seed);
+  }
+
+  const iconY = cy - hh - 92;
+  html += `<line x1="${cx}" y1="${cy-6}" x2="${cx}" y2="${iconY+46}" stroke="${color}" stroke-width="1" stroke-opacity="0.55"/>`;
+  html += `<g class="pulse-ring"><ellipse cx="${cx}" cy="${cy}" rx="34" ry="15" fill="none" stroke="${color}" stroke-width="1.6"/></g>`;
+  html += `<ellipse cx="${cx}" cy="${cy}" rx="20" ry="9" fill="${color}" opacity="0.16"/>`;
+  html += `<ellipse cx="${cx}" cy="${cy}" rx="9" ry="4" fill="${color}" opacity="0.55"/>`;
+
+  html += `<g class="icon-float">
+      <circle cx="${cx}" cy="${iconY}" r="40" fill="rgba(6,9,22,0.85)" stroke="${color}" stroke-width="1.6" filter="url(#glow)"/>
+      <circle cx="${cx}" cy="${iconY}" r="52" fill="none" stroke="${color}" stroke-width="0.8" stroke-opacity="0.35" stroke-dasharray="2 5"/>
+      <g transform="translate(${cx-14},${iconY-14}) scale(1.16)" fill="${color}" color="${color}">${icons[key]}</g>
+    </g>`;
+  const labelY = iconY - 68;
+  const chipW = Math.max(96, label.length * 11.5 + 34);
+  html += `<rect x="${cx-chipW/2}" y="${labelY-22}" width="${chipW}" height="32" rx="16" fill="rgba(6,9,22,0.72)" stroke="${color}" stroke-opacity="0.45" stroke-width="1"/>`;
+  html += `<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Sora, sans-serif" font-size="16" font-weight="700" letter-spacing="1.5" fill="#f4f8ff" filter="url(#glow)">${label}</text>`;
+
+  g.innerHTML = html;
+  g._cx = cx; g._cy = cy;
+  return g;
+}
+
+/* ---------------- sparkle burst fx (spawned on hover) ---------------- */
+const fxLayer = document.createElementNS(svgns, 'g');
+fxLayer.setAttribute('id', 'fx-layer');
+function burstSparkle(cx, cy, color){
+  const n = 3;
+  for (let i=0;i<n;i++){
+    const ang = Math.random()*Math.PI*2;
+    const dist = 30 + Math.random()*46;
+    const dx = Math.cos(ang)*dist, dy = Math.sin(ang)*dist*0.6 - 20;
+    const dot = document.createElementNS(svgns, 'circle');
+    dot.setAttribute('cx', cx); dot.setAttribute('cy', cy);
+    dot.setAttribute('r', (1.2 + Math.random()*1.6).toFixed(1));
+    dot.setAttribute('fill', color);
+    dot.setAttribute('opacity', '0.95');
+    dot.setAttribute('filter', 'url(#glow)');
+    const mv = document.createElementNS(svgns, 'animateMotion');
+    mv.setAttribute('dur', '0.9s'); mv.setAttribute('fill', 'freeze');
+    mv.setAttribute('path', `M0,0 q ${dx*0.5},${dy*0.5-24} ${dx},${dy}`);
+    const op = document.createElementNS(svgns, 'animate');
+    op.setAttribute('attributeName','opacity'); op.setAttribute('from','0.95'); op.setAttribute('to','0');
+    op.setAttribute('dur','0.9s'); op.setAttribute('fill','freeze');
+    dot.appendChild(mv); dot.appendChild(op);
+    fxLayer.appendChild(dot);
+    setTimeout(() => dot.remove(), 950);
+  }
+}
+
+/* ---------------- filters ---------------- */
+defs.innerHTML += `
+  <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="3.2" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="glowSoft" x="-80%" y="-80%" width="260%" height="260%">
+    <feGaussianBlur stdDeviation="8" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <radialGradient id="fog" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#0c1230" stop-opacity="0.9"/>
+    <stop offset="100%" stop-color="#0c1230" stop-opacity="0"/>
+  </radialGradient>
+`;
+
+const cx0 = 700, cy0 = 640;
+
+const fog = document.createElementNS(svgns,'ellipse');
+fog.setAttribute('cx',cx0); fog.setAttribute('cy',cy0+40);
+fog.setAttribute('rx',640); fog.setAttribute('ry',270);
+fog.setAttribute('fill','url(#fog)');
+svg.appendChild(fog);
+
+/* ---------------- 7 districts arranged in a ring ---------------- */
+const districts = [
+  { key:'water',   label:'WATER',     color:'#3FA9FF' },
+  { key:'car',     label:'TRAFFIC',   color:'#3fe0d0' },
+  { key:'bolt',    label:'ENERGY',    color:'#FFD24F' },
+  { key:'drone',   label:'DRONE NET', color:'#8A5CFF' },
+  { key:'warning', label:'EMERGENCY', color:'#FF4C4C' },
+  { key:'shield',  label:'SECURITY',  color:'#3fffa0' },
+  { key:'cross',   label:'HEALTH',    color:'#FF4FD8' }
+];
+
+const rx = 440, ry = 385;
+const layout = districts.map((d, i) => {
+  const angle = -Math.PI/2 + i * (2*Math.PI/districts.length);
+  return { ...d, x: cx0 + Math.cos(angle) * rx, y: cy0 + Math.sin(angle) * ry * 0.86 };
+});
+
+/* beams from hub to each district */
+const beamG = document.createElementNS(svgns,'g');
+const beamLines = {}, beamSparks = {};
+layout.forEach(d => {
+  const line = document.createElementNS(svgns,'line');
+  line.setAttribute('x1', cx0); line.setAttribute('y1', cy0);
+  line.setAttribute('x2', d.x); line.setAttribute('y2', d.y);
+  line.setAttribute('stroke', d.color);
+  line.setAttribute('stroke-width','1.4');
+  line.setAttribute('stroke-opacity','0.5');
+  line.setAttribute('filter','url(#glow)');
+  line.setAttribute('class','beam-line');
+  line.dataset.key = d.key;
+  beamG.appendChild(line);
+  beamLines[d.key] = line;
+
+  const spark = document.createElementNS(svgns,'circle');
+  spark.setAttribute('r','2.6');
+  spark.setAttribute('fill', d.color);
+  spark.setAttribute('class','beam-spark');
+  spark.dataset.key = d.key;
+  const anim = document.createElementNS(svgns,'animateMotion');
+  anim.setAttribute('dur', (2.6 + Math.random()*2).toFixed(1)+'s');
+  anim.setAttribute('repeatCount','indefinite');
+  anim.setAttribute('path', `M${cx0},${cy0} L${d.x},${d.y}`);
+  spark.appendChild(anim);
+  beamG.appendChild(spark);
+  beamSparks[d.key] = spark;
+});
+svg.appendChild(beamG);
+
+/* districts */
+const distG = document.createElementNS(svgns,'g');
+svg.appendChild(distG);
+const allDistrictGroups = [];
+layout.forEach(d => {
+  const node = makeDistrict(d.x, d.y, 175, 96, d.color, d.key, d.label, 22);
+  distG.appendChild(node);
+  allDistrictGroups.push(node);
+});
+
+svg.appendChild(fxLayer);
+
+/* central AI core tower */
+const hubG = document.createElementNS(svgns,'g');
+hubG.innerHTML = `
+  <ellipse cx="${cx0}" cy="${cy0+18}" rx="150" ry="60" fill="none" stroke="#FF4FD8" stroke-width="1.2" stroke-opacity="0.55" class="hub-ring-a"/>
+  <ellipse cx="${cx0}" cy="${cy0+18}" rx="110" ry="44" fill="none" stroke="#8A5CFF" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="3 6" class="hub-ring-b"/>
+  <ellipse cx="${cx0}" cy="${cy0+18}" rx="70" ry="28" fill="#FF4FD8" opacity="0.14"/>
+  <ellipse cx="${cx0}" cy="${cy0+18}" rx="34" ry="14" fill="#FF4FD8" opacity="0.5" filter="url(#glowSoft)"/>
+  <ellipse id="hub-cycle-ring" cx="${cx0}" cy="${cy0+18}" rx="40" ry="16" fill="none" stroke="#FF4FD8" stroke-width="1.4" opacity="0.8"/>
+`;
+svg.appendChild(hubG);
+
+/* hub ring cycles through each district's color to feel alive */
+const cycleRing = hubG.querySelector('#hub-cycle-ring');
+let cycleIdx = 0;
+setInterval(() => {
+  cycleIdx = (cycleIdx+1) % districts.length;
+  const col = districts[cycleIdx].color;
+  cycleRing.setAttribute('stroke', col);
+  cycleRing.animate(
+    [ { transform:'scale(0.6)', opacity:0.9 }, { transform:'scale(2.1)', opacity:0 } ],
+    { duration: 1400, easing:'ease-out' }
+  );
+}, 1500);
+
+/* central tower is itself a hoverable 3D component, same as the districts */
+const towerG = document.createElementNS(svgns,'g');
+towerG.setAttribute('class', 'tilt-3d');
+towerG.dataset.key = 'core';
+towerG.dataset.label = 'NEURAL CORE';
+towerG.dataset.color = '#FF4FD8';
+towerG.style.color = '#FF4FD8';
+const towerSeed = rnd(4242);
+let towerHtml = '';
+for (let i=0;i<6;i++){
+  const s = 32 - i*4.2;
+  const h = 32;
+  const yBase = cy0 + 8 - i*h;
+  towerHtml += isoBuilding(cx0, yBase, s, h, '#FF4FD8', towerSeed);
+}
+towerHtml += `<line x1="${cx0}" y1="${cy0+8-6*32}" x2="${cx0}" y2="${cy0+8-6*32-46}" stroke="#FF4FD8" stroke-width="2" filter="url(#glow)"/>`;
+towerHtml += `<circle cx="${cx0}" cy="${cy0+8-6*32-50}" r="4" fill="#FF4FD8" filter="url(#glowSoft)"/>`;
+towerG.innerHTML = towerHtml;
+towerG._cx = cx0; towerG._cy = cy0 - 90;
+svg.appendChild(towerG);
+allDistrictGroups.push(towerG);
+stats.core = [['Agents online', '312'], ['Model sync', '100%'], ['Decisions/s', '4.2k']];
+
+const twinkleG = document.createElementNS(svgns,'g');
+const R2 = rnd(99);
+for (let i=0;i<40;i++){
+  const c = document.createElementNS(svgns,'circle');
+  c.setAttribute('cx', R2()*1400); c.setAttribute('cy', R2()*550);
+  c.setAttribute('r', (R2()*1.4+0.4).toFixed(2));
+  c.setAttribute('fill', '#cfe0ff');
+  c.setAttribute('class','star');
+  c.style.animationDuration = (1.6 + R2()*2.4).toFixed(2)+'s';
+  c.style.animationDelay = (R2()*2).toFixed(2)+'s';
+  twinkleG.appendChild(c);
+}
+svg.appendChild(twinkleG);
+
+/* ================= 3D TILT ON HOVER (per component, not the whole scene) ================= */
+const tooltip = document.getElementById('tooltip');
+let sparkleInterval = null;
+
+allDistrictGroups.forEach(node => {
+  node.addEventListener('mouseenter', () => {
+    const key = node.dataset.key, color = node.dataset.color, label = node.dataset.label;
+    allDistrictGroups.forEach(o => { if (o !== node) o.classList.add('dimmed'); });
+    node.classList.add('hovered');
+    Object.values(beamLines).forEach(l => l.classList.toggle('active', l.dataset.key === key));
+    Object.values(beamLines).forEach(l => l.classList.toggle('dimmed', l.dataset.key !== key));
+    Object.values(beamSparks).forEach(s => s.classList.toggle('dimmed', s.dataset.key !== key));
+
+    const rows = stats[key] || [];
+    tooltip.innerHTML = `
+      <div class="tt-head"><span class="tt-dot" style="background:${color};color:${color}"></span><span class="tt-title">${label}</span></div>
+      ${rows.map(r => `<div class="tt-row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}
+    `;
+    tooltip.classList.add('visible');
+
+    if (sparkleInterval) clearInterval(sparkleInterval);
+    burstSparkle(node._cx, node._cy - 40, color);
+    sparkleInterval = setInterval(() => burstSparkle(node._cx, node._cy - 40, color), 500);
+  });
+
+  /* tilt this single component in 3D toward the cursor, and lift it forward */
+  node.addEventListener('mousemove', (e) => {
+    const rect = node.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width;   // 0..1
+    const py = (e.clientY - rect.top) / rect.height;    // 0..1
+    const tiltY = (px - 0.5) * 22;   // left/right tilt
+    const tiltX = (0.5 - py) * 16;   // up/down tilt
+    node.style.transform = `perspective(700px) rotateX(${tiltX.toFixed(1)}deg) rotateY(${tiltY.toFixed(1)}deg) translateY(-8px) scale(1.09)`;
+
+    tooltip.style.left = e.clientX + 'px';
+    tooltip.style.top = e.clientY + 'px';
+  });
+
+  node.addEventListener('mouseleave', () => {
+    allDistrictGroups.forEach(o => o.classList.remove('dimmed'));
+    node.classList.remove('hovered');
+    node.style.transform = '';
+    Object.values(beamLines).forEach(l => { l.classList.remove('active'); l.classList.remove('dimmed'); });
+    Object.values(beamSparks).forEach(s => s.classList.remove('dimmed'));
+    tooltip.classList.remove('visible');
+    if (sparkleInterval) { clearInterval(sparkleInterval); sparkleInterval = null; }
+  });
+});
+
+/* ambient mouse-follow spotlight (lighting only, does not rotate anything) */
+const stage = document.getElementById('stage');
+const sceneWrap = document.getElementById('sceneWrap');
+const spotlight = document.getElementById('spotlight');
+sceneWrap.addEventListener('mousemove', (e) => {
+  const r = stage.getBoundingClientRect();
+  const mx = ((e.clientX - r.left) / r.width) * 100;
+  const my = ((e.clientY - r.top) / r.height) * 100;
+  spotlight.style.setProperty('--mx', mx+'%');
+  spotlight.style.setProperty('--my', my+'%');
+  spotlight.classList.add('on');
+});
+sceneWrap.addEventListener('mouseleave', () => spotlight.classList.remove('on'));
+</script>
+</body>
+</html>
