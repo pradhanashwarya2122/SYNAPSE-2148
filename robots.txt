@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://synapse-2148.pages.dev/sitemap.xml

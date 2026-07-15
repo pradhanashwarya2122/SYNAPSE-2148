@@ -1,0 +1,10 @@
+# SYNAPSE — When AI Disagrees, Humanity Decides
+> Real-time AI Agent Swarm Control Center. Monitor autonomous agents, detect conflicts, simulate risk, and authorize human-layer interventions across the Stellar Federation.
+
+## Key Pages
+- /: Main control center dashboard
+- /#overview: System-wide metrics and mission parameters
+- /#agents: Live AI agent roster and status
+- /#conflicts: Active resource conflict detector
+- /#simulation: Predictive risk simulation
+- /#analytics: City agent map and system health
