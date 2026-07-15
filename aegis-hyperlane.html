@@ -323,6 +323,9 @@ body.loading { overflow:hidden; }
 
 /* bold keyword highlight accent (mission parameters copy) */
 .kw-highlight { color:#F8FAFC; font-weight:600; }
+
+/* Smooth scrolling */
+html { scroll-behavior: smooth; }
 </style>
 </head>
 <body class="min-h-screen bg-grid text-nexus-textBright text-sm antialiased selection:bg-nexus-cyan selection:text-nexus-bg overflow-x-hidden">
@@ -357,12 +360,12 @@ body.loading { overflow:hidden; }
 </div>
 </div>
 <nav class="hidden md:flex items-center gap-8 text-xs font-mono font-medium tracking-wider text-nexus-text">
-<a class="nav-reveal text-white border-b-2 border-nexus-magenta pb-1 transition-colors" href="#overview">OVERVIEW<span class="nav-tip">System-wide status at a glance</span></a>
-<a class="nav-reveal hover:text-white transition-colors" href="#agents">AGENTS<span class="nav-tip">Browse the live swarm roster</span></a>
-<a class="nav-reveal hover:text-white transition-colors" href="#conflicts">CONFLICTS<span class="nav-tip">Active resource contentions</span></a>
-<a class="nav-reveal hover:text-white transition-colors" href="#simulation">SIMULATION<span class="nav-tip">Run predictive risk models</span></a>
-<a class="nav-reveal hover:text-white transition-colors" href="#analytics">ANALYTICS<span class="nav-tip">Historical trends &amp; charts</span></a>
-<a class="nav-reveal hover:text-white transition-colors" href="#about">ABOUT<span class="nav-tip">Project &amp; protocol details</span></a>
+<a class="nav-reveal text-white border-b-2 border-nexus-magenta pb-1 transition-colors nav-link" href="#overview">OVERVIEW<span class="nav-tip">System-wide status at a glance</span></a>
+<a class="nav-reveal hover:text-white transition-colors nav-link" href="#agents">AGENTS<span class="nav-tip">Browse the live swarm roster</span></a>
+<a class="nav-reveal hover:text-white transition-colors nav-link" href="#conflicts">CONFLICTS<span class="nav-tip">Active resource contentions</span></a>
+<a class="nav-reveal hover:text-white transition-colors nav-link" href="#simulation">SIMULATION<span class="nav-tip">Run predictive risk models</span></a>
+<a class="nav-reveal hover:text-white transition-colors nav-link" href="#analytics">ANALYTICS<span class="nav-tip">Historical trends &amp; charts</span></a>
+<a class="nav-reveal hover:text-white transition-colors nav-link" href="#about">ABOUT<span class="nav-tip">Project &amp; protocol details</span></a>
 </nav>
 <div class="flex items-center gap-4">
 <button class="w-8 h-8 rounded-full border border-nexus-border flex items-center justify-center text-nexus-text hover:text-white hover:border-nexus-cyan transition-colors relative">
@@ -400,11 +403,11 @@ body.loading { overflow:hidden; }
     </p>
     <p class="hero-sub font-mono text-[11px] text-nexus-cyan/80 mb-8 h-4 type-cursor" id="heroTyper"></p>
     <div class="hero-cta flex items-center gap-4 font-mono">
-      <button class="clip-button bg-gradient-to-r from-nexus-magenta to-violet-600 text-white px-8 py-3 text-xs font-bold tracking-widest hover:shadow-neon-magenta hover:scale-[1.03] transition-all flex items-center gap-2">
+      <button class="clip-button bg-gradient-to-r from-nexus-magenta to-violet-600 text-white px-8 py-3 text-xs font-bold tracking-widest hover:shadow-neon-magenta hover:scale-[1.03] transition-all flex items-center gap-2" onclick="document.getElementById('overview').scrollIntoView({behavior:'smooth'})">
         LAUNCH CONTROL CENTER
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
       </button>
-      <button class="clip-button border border-nexus-border bg-nexus-surface hover:bg-nexus-surfaceHover text-white px-6 py-3 text-xs font-bold tracking-widest transition-all flex items-center gap-2">
+      <button class="clip-button border border-nexus-border bg-nexus-surface hover:bg-nexus-surfaceHover text-white px-6 py-3 text-xs font-bold tracking-widest transition-all flex items-center gap-2" onclick="document.getElementById('overview').scrollIntoView({behavior:'smooth'})">
         <svg class="w-4 h-4 text-nexus-cyan" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" fill-rule="evenodd"></path></svg>
         WATCH OVERVIEW
       </button>
@@ -419,61 +422,64 @@ body.loading { overflow:hidden; }
 
 <main class="pb-12 px-6 max-w-[1600px] mx-auto space-y-6 pt-12">
 
-<!-- Mission Parameters -->
-<section class="cyber-panel rounded-2xl p-6 reveal">
-  <div class="space-y-4">
-    <h4 class="text-[11px] font-mono font-bold tracking-[0.1em] text-nexus-magenta uppercase flex items-center gap-2">
-      <span class="w-1.5 h-1.5 bg-nexus-magenta rounded-full live-dot"></span>MISSION PARAMETERS
-    </h4>
+<!-- OVERVIEW Section -->
+<section id="overview" class="scroll-mt-20">
+  <!-- Mission Parameters -->
+  <section class="cyber-panel rounded-2xl p-6 reveal">
+    <div class="space-y-4">
+      <h4 class="text-[11px] font-mono font-bold tracking-[0.1em] text-nexus-magenta uppercase flex items-center gap-2">
+        <span class="w-1.5 h-1.5 bg-nexus-magenta rounded-full live-dot"></span>MISSION PARAMETERS
+      </h4>
 
-    <div class="border-t border-nexus-border/40"></div>
+      <div class="border-t border-nexus-border/40"></div>
 
-    <div class="space-y-2">
-      <h5 class="text-xs font-mono font-bold tracking-[0.14em] text-nexus-cyan uppercase">Mission Overview</h5>
-      <p class="text-sm text-nexus-text leading-relaxed opacity-70">The <span class="kw-highlight">SYNAPSE</span> network has detected a breakdown in autonomous consensus across multiple planetary AI systems. Individually rational decisions are now competing for shared resources, threatening the stability of the <span class="kw-highlight">Stellar Federation</span>.</p>
-      <p class="text-sm text-nexus-text leading-relaxed opacity-70">Your mission is to <span class="kw-highlight">monitor</span> these systems, understand the cause of conflicts, <span class="kw-highlight">simulate</span> potential outcomes, and <span class="kw-highlight">authorize strategic interventions</span> before localized incidents escalate into interstellar crises.</p>
+      <div class="space-y-2">
+        <h5 class="text-xs font-mono font-bold tracking-[0.14em] text-nexus-cyan uppercase">Mission Overview</h5>
+        <p class="text-sm text-nexus-text leading-relaxed opacity-70">The <span class="kw-highlight">SYNAPSE</span> network has detected a breakdown in autonomous consensus across multiple planetary AI systems. Individually rational decisions are now competing for shared resources, threatening the stability of the <span class="kw-highlight">Stellar Federation</span>.</p>
+        <p class="text-sm text-nexus-text leading-relaxed opacity-70">Your mission is to <span class="kw-highlight">monitor</span> these systems, understand the cause of conflicts, <span class="kw-highlight">simulate</span> potential outcomes, and <span class="kw-highlight">authorize strategic interventions</span> before localized incidents escalate into interstellar crises.</p>
+      </div>
+
+      <div class="border-t border-nexus-border/40"></div>
+
+      <p class="text-sm text-nexus-text leading-relaxed opacity-70">Initializing tactical oversight protocol. Synchronizing neural agent swarms across all seven primary districts. Current mission parameters focus on <span class="kw-highlight">grid stability</span> and <span class="kw-highlight">predictive conflict mitigation</span> within the central AI core corridor. Monitor swarm latency and system health for real-time adjustments. All tactical nodes are currently reporting <span class="kw-highlight">nominal throughput</span>, though localized variance in the tertiary processing clusters suggests a potential <span class="kw-highlight">bottleneck</span> in the upcoming simulation cycle.</p>
     </div>
+  </section>
 
-    <div class="border-t border-nexus-border/40"></div>
-
-    <p class="text-sm text-nexus-text leading-relaxed opacity-70">Initializing tactical oversight protocol. Synchronizing neural agent swarms across all seven primary districts. Current mission parameters focus on <span class="kw-highlight">grid stability</span> and <span class="kw-highlight">predictive conflict mitigation</span> within the central AI core corridor. Monitor swarm latency and system health for real-time adjustments. All tactical nodes are currently reporting <span class="kw-highlight">nominal throughput</span>, though localized variance in the tertiary processing clusters suggests a potential <span class="kw-highlight">bottleneck</span> in the upcoming simulation cycle.</p>
+  <!-- Top Metrics -->
+  <section class="grid grid-cols-2 md:grid-cols-5 gap-4 cyber-panel rounded-2xl p-6 reveal mt-6">
+  <div class="border-r border-nexus-border/50 pr-4">
+  <h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">TOTAL AGENTS</h3>
+  <p class="text-3xl font-light text-white metric-val" id="mTotal" data-count="12847">0</p>
   </div>
+  <div class="border-r border-nexus-border/50 px-4">
+  <h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">ACTIVE AGENTS</h3>
+  <p class="text-3xl font-light text-white metric-val" id="mActive" data-count="11243">0</p>
+  </div>
+  <div class="border-r border-nexus-border/50 px-4">
+  <h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">ACTIVE CONFLICTS</h3>
+  <p class="text-3xl font-light text-nexus-magenta metric-val" id="mConflicts" data-count="23">0</p>
+  </div>
+  <div class="border-r border-nexus-border/50 px-4">
+  <h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">SYSTEM HEALTH</h3>
+  <p class="text-3xl font-light text-nexus-success metric-val"><span id="mHealth" data-count="94.2">0</span>%</p>
+  </div>
+  <div class="px-4">
+  <h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">OVERALL RISK LEVEL</h3>
+  <div class="flex items-center gap-3">
+  <p class="text-xl font-bold text-nexus-amber tracking-wider" id="mRisk">MEDIUM</p>
+  <div class="flex gap-1 h-1 flex-1" id="riskBars">
+  <div class="bg-nexus-amber h-full w-full transition-colors duration-500"></div>
+  <div class="bg-nexus-amber h-full w-full transition-colors duration-500"></div>
+  <div class="bg-nexus-border h-full w-full transition-colors duration-500"></div>
+  <div class="bg-nexus-border h-full w-full transition-colors duration-500"></div>
+  </div>
+  </div>
+  </div>
+  </section>
 </section>
 
-<!-- Top Metrics -->
-<section class="grid grid-cols-2 md:grid-cols-5 gap-4 cyber-panel rounded-2xl p-6 reveal">
-<div class="border-r border-nexus-border/50 pr-4">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">TOTAL AGENTS</h3>
-<p class="text-3xl font-light text-white metric-val" id="mTotal" data-count="12847">0</p>
-</div>
-<div class="border-r border-nexus-border/50 px-4">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">ACTIVE AGENTS</h3>
-<p class="text-3xl font-light text-white metric-val" id="mActive" data-count="11243">0</p>
-</div>
-<div class="border-r border-nexus-border/50 px-4">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">ACTIVE CONFLICTS</h3>
-<p class="text-3xl font-light text-nexus-magenta metric-val" id="mConflicts" data-count="23">0</p>
-</div>
-<div class="border-r border-nexus-border/50 px-4">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">SYSTEM HEALTH</h3>
-<p class="text-3xl font-light text-nexus-success metric-val"><span id="mHealth" data-count="94.2">0</span>%</p>
-</div>
-<div class="px-4">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">OVERALL RISK LEVEL</h3>
-<div class="flex items-center gap-3">
-<p class="text-xl font-bold text-nexus-amber tracking-wider" id="mRisk">MEDIUM</p>
-<div class="flex gap-1 h-1 flex-1" id="riskBars">
-<div class="bg-nexus-amber h-full w-full transition-colors duration-500"></div>
-<div class="bg-nexus-amber h-full w-full transition-colors duration-500"></div>
-<div class="bg-nexus-border h-full w-full transition-colors duration-500"></div>
-<div class="bg-nexus-border h-full w-full transition-colors duration-500"></div>
-</div>
-</div>
-</div>
-</section>
-
-<!-- Core AI Ecosystem -->
-<section class="reveal">
+<!-- AGENTS Section -->
+<section id="agents" class="reveal scroll-mt-20 mt-6">
 <div class="flex items-center gap-2 text-nexus-magenta text-xs font-mono font-bold tracking-widest mb-4">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
 CORE AI ECOSYSTEM
@@ -491,69 +497,72 @@ CORE AI ECOSYSTEM
 </div>
 </section>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-<!-- City Agent Map -->
-<section class="cyber-panel rounded-2xl p-6 lg:col-span-2 flex flex-col reveal">
-<div class="flex justify-between items-start mb-4">
-<div>
-<h3 class="font-bold text-white text-lg tracking-wide mb-1 wipe-title">CITY AGENT MAP</h3>
-<p class="text-xs text-nexus-text font-mono uppercase flex items-center gap-2"><span class="w-1.5 h-1.5 bg-nexus-cyan rounded-full live-dot"></span>Live network overview</p>
-</div>
-<span class="font-mono text-[10px] text-nexus-cyan border border-nexus-cyan/30 px-2 py-1 rounded bg-nexus-cyan/5" id="mapNodes">7 DISTRICTS</span>
-</div>
-<div class="flex-1 min-h-[340px] relative border border-nexus-border/30 rounded bg-nexus-bg overflow-hidden flex">
-<iframe id="cityMap" src="map_v2.html" title="City Agent Map" class="flex-1 w-full h-full border-0" loading="lazy"></iframe>
-<div class="hidden md:flex w-48 bg-nexus-surface border-l border-nexus-border/50 p-4 font-mono text-xs flex-col justify-between">
-<div class="space-y-3" id="mapLegend"></div>
-<button class="mt-4 text-nexus-magenta hover:text-white flex items-center justify-between border-t border-nexus-border/50 pt-3 w-full transition-colors">
-VIEW FULL MAP <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</div>
-</div>
+<!-- ANALYTICS Section (City Map + System Health) -->
+<section id="analytics" class="scroll-mt-20 mt-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- City Agent Map -->
+  <section class="cyber-panel rounded-2xl p-6 lg:col-span-2 flex flex-col reveal">
+  <div class="flex justify-between items-start mb-4">
+  <div>
+  <h3 class="font-bold text-white text-lg tracking-wide mb-1 wipe-title">CITY AGENT MAP</h3>
+  <p class="text-xs text-nexus-text font-mono uppercase flex items-center gap-2"><span class="w-1.5 h-1.5 bg-nexus-cyan rounded-full live-dot"></span>Live network overview</p>
+  </div>
+  <span class="font-mono text-[10px] text-nexus-cyan border border-nexus-cyan/30 px-2 py-1 rounded bg-nexus-cyan/5" id="mapNodes">7 DISTRICTS</span>
+  </div>
+  <div class="flex-1 min-h-[340px] relative border border-nexus-border/30 rounded bg-nexus-bg overflow-hidden flex">
+  <iframe id="cityMap" src="map_v2.html" title="City Agent Map" class="flex-1 w-full h-full border-0" loading="lazy"></iframe>
+  <div class="hidden md:flex w-48 bg-nexus-surface border-l border-nexus-border/50 p-4 font-mono text-xs flex-col justify-between">
+  <div class="space-y-3" id="mapLegend"></div>
+  <button class="mt-4 text-nexus-magenta hover:text-white flex items-center justify-between border-t border-nexus-border/50 pt-3 w-full transition-colors">
+  VIEW FULL MAP <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+  </button>
+  </div>
+  </div>
+  </section>
+
+  <!-- System Health -->
+  <section class="cyber-panel rounded-2xl p-6 flex flex-col reveal reveal-delay-1">
+  <div class="mb-6">
+  <h3 class="font-bold text-white text-lg tracking-wide mb-1">SYSTEM HEALTH</h3>
+  <p class="text-xs text-nexus-text font-mono uppercase">Overall city system status</p>
+  </div>
+  <div class="flex-1 flex flex-col items-center justify-center relative min-h-[200px]">
+  <svg width="180" height="180" viewBox="0 0 180 180" class="risk-glow">
+    <circle cx="90" cy="90" r="78" fill="none" stroke="rgba(56,189,248,0.15)" stroke-width="6"/>
+    <circle id="healthRing" cx="90" cy="90" r="78" fill="none" stroke="url(#healthGrad)" stroke-width="6"
+      stroke-linecap="round" stroke-dasharray="490" stroke-dashoffset="490"
+      transform="rotate(-90 90 90)" style="transition: stroke-dashoffset 1.5s cubic-bezier(.16,1,.3,1)"/>
+    <circle cx="90" cy="90" r="66" fill="none" stroke="rgba(56,189,248,0.1)" stroke-width="1" stroke-dasharray="3 6" style="animation: spinSlow 30s linear infinite; transform-origin: 90px 90px;"/>
+    <defs>
+      <linearGradient id="healthGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#3DA5FF"/><stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  <div class="absolute text-center">
+    <span class="text-4xl font-light text-white block leading-none"><span id="healthNum">94.2</span><span class="text-lg text-nexus-text">%</span></span>
+    <span class="text-[10px] text-nexus-cyan font-mono uppercase tracking-widest block mt-1" id="healthLabel">OPTIMAL</span>
+  </div>
+  </div>
+  <div class="grid grid-cols-2 gap-4 mt-6 border-t border-nexus-border/30 pt-4 font-mono text-xs">
+  <div class="bg-nexus-surface border border-nexus-border/30 p-3 rounded-xl">
+  <p class="text-nexus-text mb-1">RISK LEVEL</p>
+  <p class="text-nexus-amber font-bold text-sm" id="riskMini">MEDIUM</p>
+  </div>
+  <div class="bg-nexus-surface border border-nexus-border/30 p-3 rounded-xl">
+  <p class="text-nexus-text mb-1">ACTIVE ALERTS</p>
+  <p class="text-nexus-magenta font-bold text-sm" id="alertCount">23</p>
+  </div>
+  </div>
+  <button class="w-full mt-4 border border-nexus-magenta/50 text-nexus-magenta hover:bg-nexus-magenta/10 py-2 rounded text-xs font-mono tracking-widest flex items-center justify-center gap-2 transition-colors">
+  VIEW ALL ALERTS <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+  </button>
+  </section>
+  </div>
 </section>
 
-<!-- System Health -->
-<section class="cyber-panel rounded-2xl p-6 flex flex-col reveal reveal-delay-1">
-<div class="mb-6">
-<h3 class="font-bold text-white text-lg tracking-wide mb-1">SYSTEM HEALTH</h3>
-<p class="text-xs text-nexus-text font-mono uppercase">Overall city system status</p>
-</div>
-<div class="flex-1 flex flex-col items-center justify-center relative min-h-[200px]">
-<svg width="180" height="180" viewBox="0 0 180 180" class="risk-glow">
-  <circle cx="90" cy="90" r="78" fill="none" stroke="rgba(56,189,248,0.15)" stroke-width="6"/>
-  <circle id="healthRing" cx="90" cy="90" r="78" fill="none" stroke="url(#healthGrad)" stroke-width="6"
-    stroke-linecap="round" stroke-dasharray="490" stroke-dashoffset="490"
-    transform="rotate(-90 90 90)" style="transition: stroke-dashoffset 1.5s cubic-bezier(.16,1,.3,1)"/>
-  <circle cx="90" cy="90" r="66" fill="none" stroke="rgba(56,189,248,0.1)" stroke-width="1" stroke-dasharray="3 6" style="animation: spinSlow 30s linear infinite; transform-origin: 90px 90px;"/>
-  <defs>
-    <linearGradient id="healthGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#3DA5FF"/><stop offset="100%" stop-color="#10B981"/>
-    </linearGradient>
-  </defs>
-</svg>
-<div class="absolute text-center">
-  <span class="text-4xl font-light text-white block leading-none"><span id="healthNum">94.2</span><span class="text-lg text-nexus-text">%</span></span>
-  <span class="text-[10px] text-nexus-cyan font-mono uppercase tracking-widest block mt-1" id="healthLabel">OPTIMAL</span>
-</div>
-</div>
-<div class="grid grid-cols-2 gap-4 mt-6 border-t border-nexus-border/30 pt-4 font-mono text-xs">
-<div class="bg-nexus-surface border border-nexus-border/30 p-3 rounded-xl">
-<p class="text-nexus-text mb-1">RISK LEVEL</p>
-<p class="text-nexus-amber font-bold text-sm" id="riskMini">MEDIUM</p>
-</div>
-<div class="bg-nexus-surface border border-nexus-border/30 p-3 rounded-xl">
-<p class="text-nexus-text mb-1">ACTIVE ALERTS</p>
-<p class="text-nexus-magenta font-bold text-sm" id="alertCount">23</p>
-</div>
-</div>
-<button class="w-full mt-4 border border-nexus-magenta/50 text-nexus-magenta hover:bg-nexus-magenta/10 py-2 rounded text-xs font-mono tracking-widest flex items-center justify-center gap-2 transition-colors">
-VIEW ALL ALERTS <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</section>
-</div>
-
-<!-- Conflict Detector -->
-<section class="cyber-panel cyber-panel-magenta rounded-2xl p-6 relative reveal">
+<!-- CONFLICTS Section -->
+<section id="conflicts" class="cyber-panel cyber-panel-magenta rounded-2xl p-6 relative reveal scroll-mt-20 mt-6">
 <div class="corner-decor corner-tl" style="--color:#7C5CFF;"></div><div class="corner-decor corner-br" style="--color:#7C5CFF;"></div>
 <div class="absolute top-2 right-4 flex gap-4 font-mono text-[9px] text-nexus-magenta/50 uppercase tracking-widest pointer-events-none">
 <span>LAT: 34.0522 N</span><span>LONG: 118.2437 W</span><span id="sigStrength">SIG: 98.4%</span>
@@ -651,74 +660,78 @@ VIEW ALL ALERTS <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="
 </div>
 </section>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-<!-- Insights & Predictions -->
-<section class="cyber-panel rounded-2xl p-6 flex flex-col lg:col-span-2 reveal">
-<div class="flex justify-between items-start mb-6">
-<div>
-<h3 class="font-bold text-white text-lg tracking-wide mb-1">INSIGHTS &amp; PREDICTIONS</h3>
-<p class="text-xs text-nexus-text font-mono uppercase">AI-driven analysis</p>
-</div>
-<select class="bg-nexus-bg border border-nexus-border text-nexus-text text-xs font-mono rounded px-2 py-1 focus:ring-nexus-cyan focus:border-nexus-cyan"><option>TODAY</option><option>LAST 7 DAYS</option></select>
-</div>
-<div class="flex-1 min-h-[220px] border border-nexus-border/30 rounded bg-nexus-bg p-4 relative flex flex-col">
-<div class="flex justify-between text-[10px] text-nexus-text font-mono uppercase mb-2">
-<span>CONFLICTS OVER TIME</span>
-<span class="bg-nexus-surface px-2 py-0.5 rounded border border-nexus-border/50" id="chartBadge">23 Conflicts / 14:00</span>
-</div>
-<canvas id="conflictChart" class="flex-1 w-full"></canvas>
-</div>
+<!-- SIMULATION Section -->
+<section id="simulation" class="scroll-mt-20 mt-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <!-- Insights & Predictions -->
+  <section class="cyber-panel rounded-2xl p-6 flex flex-col lg:col-span-2 reveal">
+  <div class="flex justify-between items-start mb-6">
+  <div>
+  <h3 class="font-bold text-white text-lg tracking-wide mb-1">INSIGHTS &amp; PREDICTIONS</h3>
+  <p class="text-xs text-nexus-text font-mono uppercase">AI-driven analysis</p>
+  </div>
+  <select class="bg-nexus-bg border border-nexus-border text-nexus-text text-xs font-mono rounded px-2 py-1 focus:ring-nexus-cyan focus:border-nexus-cyan"><option>TODAY</option><option>LAST 7 DAYS</option></select>
+  </div>
+  <div class="flex-1 min-h-[220px] border border-nexus-border/30 rounded bg-nexus-bg p-4 relative flex flex-col">
+  <div class="flex justify-between text-[10px] text-nexus-text font-mono uppercase mb-2">
+  <span>CONFLICTS OVER TIME</span>
+  <span class="bg-nexus-surface px-2 py-0.5 rounded border border-nexus-border/50" id="chartBadge">23 Conflicts / 14:00</span>
+  </div>
+  <canvas id="conflictChart" class="flex-1 w-full"></canvas>
+  </div>
+  </section>
+
+  <!-- Predictive Risk -->
+  <section class="cyber-panel rounded-2xl p-6 flex flex-col cyber-panel-magenta lg:col-span-1 reveal reveal-delay-1">
+  <h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-4">PREDICTIVE RISK SCORE</h3>
+  <div class="flex items-end gap-2 mb-4">
+  <span class="text-5xl font-bold text-nexus-magenta leading-none risk-glow" id="riskScore">68%</span>
+  <span class="text-nexus-magenta font-mono text-xs uppercase font-bold bg-nexus-magenta/10 px-2 py-0.5 rounded border border-nexus-magenta/30 mb-1">HIGH RISK</span>
+  </div>
+  <p class="text-sm text-nexus-text flex-1">Probability of critical conflict in next 6 hours</p>
+  <div class="space-y-4 mt-6" id="riskFactors">
+  <div><div class="flex justify-between text-xs font-mono mb-1"><span class="text-white">Power Demand Spike</span><span class="text-nexus-magenta rf-val">32%</span></div><div class="w-full bg-nexus-bg rounded-full h-1.5"><div class="bg-nexus-magenta h-1.5 rounded-full transition-all duration-1000 rf-bar" style="width:32%"></div></div></div>
+  <div><div class="flex justify-between text-xs font-mono mb-1"><span class="text-white">Traffic Congestion</span><span class="text-nexus-amber rf-val">24%</span></div><div class="w-full bg-nexus-bg rounded-full h-1.5"><div class="bg-nexus-amber h-1.5 rounded-full transition-all duration-1000 rf-bar" style="width:24%"></div></div></div>
+  <div><div class="flex justify-between text-xs font-mono mb-1"><span class="text-white">Water Supply Instability</span><span class="text-nexus-amber rf-val">18%</span></div><div class="w-full bg-nexus-bg rounded-full h-1.5"><div class="bg-nexus-amber h-1.5 rounded-full transition-all duration-1000 rf-bar" style="width:18%"></div></div></div>
+  </div>
+  <button class="w-full mt-6 border border-nexus-magenta bg-nexus-magenta/5 hover:bg-nexus-magenta/20 text-white py-2 rounded text-xs font-mono tracking-widest flex items-center justify-center gap-2 transition-colors">
+  RUN SIMULATION <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+  </button>
+  </section>
+
+  <!-- Synapse Copilot -->
+  <section class="cyber-panel rounded-2xl p-6 flex flex-col border-nexus-cyan/50 lg:col-span-1 relative overflow-hidden reveal reveal-delay-2">
+  <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none" style="z-index:0">
+    <source src="assets/clips/robot.mp4" type="video/mp4">
+  </video>
+  <div class="absolute inset-0 bg-gradient-to-t from-nexus-bg/90 via-nexus-bg/60 to-nexus-bg/40 pointer-events-none" style="z-index:1"></div>
+  <div class="absolute -right-10 -top-10 w-32 h-32 bg-nexus-cyan/10 rounded-full blur-2xl" style="z-index:2"></div>
+  <h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">AI ASSISTANT</h3>
+  <p class="font-bold text-white text-lg tracking-wide mb-6">SYNAPSE COPILOT</p>
+  <div class="flex-1 flex flex-col items-center justify-center">
+  <div class="w-20 h-20 rounded-full border border-nexus-cyan/30 flex items-center justify-center mb-4 relative">
+  <div class="absolute inset-0 border border-nexus-cyan rounded-full border-t-transparent" style="animation: spinSlow 4s linear infinite"></div>
+  <div class="absolute inset-2 border border-nexus-cyan/50 rounded-full border-b-transparent" style="animation: spinRev 3s linear infinite"></div>
+  <svg class="w-8 h-8 text-nexus-cyan drop-shadow-[0_0_5px_rgba(61,165,255,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
+  </div>
+  <div class="flex items-end gap-0.5 h-4 mb-3">
+  <div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:0s"></div>
+  <div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.15s"></div>
+  <div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.3s"></div>
+  <div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.45s"></div>
+  <div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.6s"></div>
+  </div>
+  <p class="text-xs text-nexus-text text-center italic mb-4 min-h-[32px]" id="copilotSays">"All systems operational. How can I assist you today, Operator?"</p>
+  </div>
+  <button class="w-full border border-nexus-cyan/50 text-nexus-cyan hover:bg-nexus-cyan/10 py-2 rounded text-xs font-mono tracking-widest flex items-center justify-center gap-2 transition-colors">
+  ASK SYNAPSE <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+  </button>
+  </section>
+  </div>
 </section>
 
-<!-- Predictive Risk -->
-<section class="cyber-panel rounded-2xl p-6 flex flex-col cyber-panel-magenta lg:col-span-1 reveal reveal-delay-1">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-4">PREDICTIVE RISK SCORE</h3>
-<div class="flex items-end gap-2 mb-4">
-<span class="text-5xl font-bold text-nexus-magenta leading-none risk-glow" id="riskScore">68%</span>
-<span class="text-nexus-magenta font-mono text-xs uppercase font-bold bg-nexus-magenta/10 px-2 py-0.5 rounded border border-nexus-magenta/30 mb-1">HIGH RISK</span>
-</div>
-<p class="text-sm text-nexus-text flex-1">Probability of critical conflict in next 6 hours</p>
-<div class="space-y-4 mt-6" id="riskFactors">
-<div><div class="flex justify-between text-xs font-mono mb-1"><span class="text-white">Power Demand Spike</span><span class="text-nexus-magenta rf-val">32%</span></div><div class="w-full bg-nexus-bg rounded-full h-1.5"><div class="bg-nexus-magenta h-1.5 rounded-full transition-all duration-1000 rf-bar" style="width:32%"></div></div></div>
-<div><div class="flex justify-between text-xs font-mono mb-1"><span class="text-white">Traffic Congestion</span><span class="text-nexus-amber rf-val">24%</span></div><div class="w-full bg-nexus-bg rounded-full h-1.5"><div class="bg-nexus-amber h-1.5 rounded-full transition-all duration-1000 rf-bar" style="width:24%"></div></div></div>
-<div><div class="flex justify-between text-xs font-mono mb-1"><span class="text-white">Water Supply Instability</span><span class="text-nexus-amber rf-val">18%</span></div><div class="w-full bg-nexus-bg rounded-full h-1.5"><div class="bg-nexus-amber h-1.5 rounded-full transition-all duration-1000 rf-bar" style="width:18%"></div></div></div>
-</div>
-<button class="w-full mt-6 border border-nexus-magenta bg-nexus-magenta/5 hover:bg-nexus-magenta/20 text-white py-2 rounded text-xs font-mono tracking-widest flex items-center justify-center gap-2 transition-colors">
-RUN SIMULATION <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</section>
-
-<!-- Synapse Copilot -->
-<section class="cyber-panel rounded-2xl p-6 flex flex-col border-nexus-cyan/50 lg:col-span-1 relative overflow-hidden reveal reveal-delay-2">
-<video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none" style="z-index:0">
-  <source src="assets/clips/robot.mp4" type="video/mp4">
-</video>
-<div class="absolute inset-0 bg-gradient-to-t from-nexus-bg/90 via-nexus-bg/60 to-nexus-bg/40 pointer-events-none" style="z-index:1"></div>
-<div class="absolute -right-10 -top-10 w-32 h-32 bg-nexus-cyan/10 rounded-full blur-2xl" style="z-index:2"></div>
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">AI ASSISTANT</h3>
-<p class="font-bold text-white text-lg tracking-wide mb-6">SYNAPSE COPILOT</p>
-<div class="flex-1 flex flex-col items-center justify-center">
-<div class="w-20 h-20 rounded-full border border-nexus-cyan/30 flex items-center justify-center mb-4 relative">
-<div class="absolute inset-0 border border-nexus-cyan rounded-full border-t-transparent" style="animation: spinSlow 4s linear infinite"></div>
-<div class="absolute inset-2 border border-nexus-cyan/50 rounded-full border-b-transparent" style="animation: spinRev 3s linear infinite"></div>
-<svg class="w-8 h-8 text-nexus-cyan drop-shadow-[0_0_5px_rgba(61,165,255,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
-</div>
-<div class="flex items-end gap-0.5 h-4 mb-3">
-<div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:0s"></div>
-<div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.15s"></div>
-<div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.3s"></div>
-<div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.45s"></div>
-<div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.6s"></div>
-</div>
-<p class="text-xs text-nexus-text text-center italic mb-4 min-h-[32px]" id="copilotSays">"All systems operational. How can I assist you today, Operator?"</p>
-</div>
-<button class="w-full border border-nexus-cyan/50 text-nexus-cyan hover:bg-nexus-cyan/10 py-2 rounded text-xs font-mono tracking-widest flex items-center justify-center gap-2 transition-colors">
-ASK SYNAPSE <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</section>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Emergency Timeline & Rapid Actions -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
 <!-- Emergency Timeline -->
 <section class="cyber-panel rounded-2xl p-6 md:col-span-2 reveal">
 <div class="flex justify-between items-start mb-6">
@@ -765,38 +778,85 @@ Broadcast System Alert
 </div>
 </main>
 
-<!-- Footer -->
-<footer class="border-t border-nexus-border/30 bg-nexus-bg mt-12 py-8 px-6 text-nexus-text text-xs">
-<div class="max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-<div>
-<div class="flex items-center gap-2 mb-4">
-<div class="w-6 h-6 rounded border border-nexus-magenta flex items-center justify-center">
-<svg class="w-4 h-4 text-nexus-magenta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-<div><span class="text-white font-bold tracking-wider block leading-tight">SYNAPSE</span><span class="text-[9px] uppercase tracking-widest font-mono">Control Center</span></div>
-</div>
-</div>
-<div>
-<h4 class="text-white font-mono uppercase tracking-widest mb-4">PLATFORM</h4>
-<ul class="space-y-2"><li><a class="hover:text-white transition-colors" href="#">Overview</a></li><li><a class="hover:text-white transition-colors" href="#">Dashboard</a></li><li><a class="hover:text-white transition-colors" href="#">Agents</a></li><li><a class="hover:text-white transition-colors" href="#">Conflicts</a></li><li><a class="hover:text-white transition-colors" href="#">Simulation</a></li></ul>
-</div>
-<div>
-<h4 class="text-white font-mono uppercase tracking-widest mb-4">RESOURCES</h4>
-<ul class="space-y-2"><li><a class="hover:text-white transition-colors" href="#">Documentation</a></li><li><a class="hover:text-white transition-colors" href="#">API Reference</a></li><li><a class="hover:text-white transition-colors" href="#">Guides</a></li><li><a class="hover:text-white transition-colors" href="#">System Status</a></li></ul>
-</div>
-<div>
-<h4 class="text-white font-mono uppercase tracking-widest mb-4">STATUS</h4>
-<div class="flex items-center gap-2 mb-2"><div class="w-2 h-2 rounded-full bg-nexus-success shadow-neon-success live-dot"></div><span>All Systems Operational</span></div>
-<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-nexus-cyan shadow-neon-cyan"></div><span>Uptime: <span id="uptime">99.96</span>%</span></div>
-</div>
-</div>
-<div class="max-w-[1600px] mx-auto mt-8 pt-4 border-t border-nexus-border/30 text-center font-mono text-[10px]">© 2148 SYNAPSE. All rights reserved.</div>
-</footer>
+<!-- ABOUT Section -->
+<section id="about" class="scroll-mt-20">
+  <!-- Footer -->
+  <footer class="border-t border-nexus-border/30 bg-nexus-bg mt-12 py-8 px-6 text-nexus-text text-xs">
+  <div class="max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+  <div>
+  <div class="flex items-center gap-2 mb-4">
+  <div class="w-6 h-6 rounded border border-nexus-magenta flex items-center justify-center">
+  <svg class="w-4 h-4 text-nexus-magenta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+  </div>
+  <div><span class="text-white font-bold tracking-wider block leading-tight">SYNAPSE</span><span class="text-[9px] uppercase tracking-widest font-mono">Control Center</span></div>
+  </div>
+  </div>
+  <div>
+  <h4 class="text-white font-mono uppercase tracking-widest mb-4">PLATFORM</h4>
+  <ul class="space-y-2"><li><a class="hover:text-white transition-colors" href="#overview">Overview</a></li><li><a class="hover:text-white transition-colors" href="#">Dashboard</a></li><li><a class="hover:text-white transition-colors" href="#agents">Agents</a></li><li><a class="hover:text-white transition-colors" href="#conflicts">Conflicts</a></li><li><a class="hover:text-white transition-colors" href="#simulation">Simulation</a></li></ul>
+  </div>
+  <div>
+  <h4 class="text-white font-mono uppercase tracking-widest mb-4">RESOURCES</h4>
+  <ul class="space-y-2"><li><a class="hover:text-white transition-colors" href="#">Documentation</a></li><li><a class="hover:text-white transition-colors" href="#">API Reference</a></li><li><a class="hover:text-white transition-colors" href="#">Guides</a></li><li><a class="hover:text-white transition-colors" href="#">System Status</a></li></ul>
+  </div>
+  <div>
+  <h4 class="text-white font-mono uppercase tracking-widest mb-4">STATUS</h4>
+  <div class="flex items-center gap-2 mb-2"><div class="w-2 h-2 rounded-full bg-nexus-success shadow-neon-success live-dot"></div><span>All Systems Operational</span></div>
+  <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-nexus-cyan shadow-neon-cyan"></div><span>Uptime: <span id="uptime">99.96</span>%</span></div>
+  </div>
+  </div>
+  <div class="max-w-[1600px] mx-auto mt-8 pt-4 border-t border-nexus-border/30 text-center font-mono text-[10px]">© 2148 SYNAPSE. All rights reserved.</div>
+  </footer>
+</section>
 
 <div id="toastStack"></div>
 <div id="cursorGlow" class="hidden lg:block" style="position:fixed;top:0;left:0;width:420px;height:420px;border-radius:50%;pointer-events:none;z-index:40;background:radial-gradient(circle, rgba(61,165,255,0.06), transparent 70%);transform:translate(-50%,-50%);transition:opacity .3s;opacity:0;"></div>
 
 <script>
+/* ============ NAVIGATION ACTIVE STATE ============ */
+(function() {
+  const navLinks = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('section[id]');
+  
+  // Smooth scroll for all nav links
+  navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href').substring(1);
+      const targetSection = document.getElementById(targetId);
+      if (targetSection) {
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+        
+        // Update active state
+        navLinks.forEach(l => l.classList.remove('text-white', 'border-b-2', 'border-nexus-magenta'));
+        this.classList.add('text-white', 'border-b-2', 'border-nexus-magenta');
+      }
+    });
+  });
+
+  // Update active nav link on scroll
+  let scrollTimeout;
+  window.addEventListener('scroll', () => {
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      let currentSection = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100;
+        if (window.scrollY >= sectionTop) {
+          currentSection = section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('text-white', 'border-b-2', 'border-nexus-magenta');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+          link.classList.add('text-white', 'border-b-2', 'border-nexus-magenta');
+        }
+      });
+    }, 50);
+  });
+})();
+
 /* ============ UTILITIES ============ */
 const $ = id => document.getElementById(id);
 const rand = (a,b) => a + Math.random()*(b-a);
