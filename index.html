@@ -1,1366 +1,791 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Aegis Nexus — AI Agent Swarm Control Center</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script>
-tailwind.config = {
-  darkMode: 'class',
-  theme: {
-    extend: {
-      fontFamily: { sans: ['Bricolage Grotesque','sans-serif'], serif: ['Newsreader','serif'], mono: ['JetBrains Mono','monospace'] },
-      colors: { nexus: {
-        bg:'#0A0B1F', surface:'rgba(15,23,42,0.4)', surfaceHover:'rgba(30,41,59,0.6)',
-        border:'rgba(56,189,248,0.2)', magenta:'#7C5CFF', cyan:'#3DA5FF', amber:'#FFB800',
-        text:'#94A3B8', textBright:'#F8FAFC', success:'#10B981', danger:'#EF4444'
-      }},
-      boxShadow: {
-        'neon-magenta':'0 0 10px rgba(124,92,255,0.3)',
-        'neon-cyan':'0 0 10px rgba(61,165,255,0.3)',
-        'neon-success':'0 0 8px rgba(16,185,129,0.5)'
-      }
-    }
-  }
-}
-</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYNAPSE — When AI Disagrees, Humanity Decides</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* Hallmark · redesign: existing dashboard recoloured to custom theme "Hyperlane" · accent: electric-violet/blue hue-shift from magenta/cyan · gradient (magic-text) preserved */
-body { background-color:#0A0B1F; color:#F8FAFC; font-family:'Newsreader',serif; }
+  :root {
+    --void: #0a0a0c;
+    --panel: #111114;
+    --hairline: rgba(244,243,239,0.10);
+    --hairline-strong: rgba(244,243,239,0.22);
+    --ink: #f4f3ef;
+    --ink-dim: #93939b;
+    --ink-faint: #5c5c63;
+    --gold: #c9a867;
+    --alert: #b5493c;
+    --font-display: 'Instrument Serif', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
 
-/* Wayfare pairing: Bricolage Grotesque for display/headings/UI labels, Newsreader for reading copy */
-h1, h2, h3, h4, h5, h6,
-.loader-logo, nav, button, .clip-button { font-family: 'Bricolage Grotesque', sans-serif; }
-h2 { font-weight: 700; }
-p, .hero-sub { font-family: 'Newsreader', serif; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-.bg-grid {
-  background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
+  body {
+    background: var(--void);
+    color: var(--ink);
+    font-family: var(--font-body);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
 
-.cyber-panel {
-  background: linear-gradient(135deg, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.4) 100%);
-  border: 1px solid rgba(56,189,248,0.2);
-  backdrop-filter: blur(10px);
-  position: relative;
-  overflow: hidden;
-}
-.cyber-panel::before {
-  content:''; position:absolute; inset:0;
-  background: radial-gradient(circle at top right, rgba(61,165,255,0.05) 0%, transparent 50%);
-  pointer-events:none;
-}
-/* magical sheen sweep on hover */
-.cyber-panel::after {
-  content:''; position:absolute; top:0; left:-80%;
-  width:50%; height:100%;
-  background: linear-gradient(105deg, transparent 0%, rgba(61,165,255,0.07) 45%, rgba(255,255,255,0.10) 50%, rgba(61,165,255,0.07) 55%, transparent 100%);
-  transform: skewX(-20deg);
-  transition: left 0.9s ease;
-  pointer-events:none;
-}
-.cyber-panel:hover::after { left: 130%; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
 
-.cyber-panel-magenta { border-color: rgba(124,92,255,0.3); }
-.cyber-panel-cyan { border-color: rgba(61,165,255,0.3); }
+  /* ---------- BACKGROUND VIDEO ---------- */
+  .video-layer {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -3;
+    overflow: hidden;
+  }
 
-.corner-decor { position:absolute; width:8px; height:8px; border:1px solid; z-index:5; }
-.corner-tl { top:-1px; left:-1px; border-color: var(--color) transparent transparent var(--color); }
-.corner-tr { top:-1px; right:-1px; border-color: var(--color) var(--color) transparent transparent; }
-.corner-bl { bottom:-1px; left:-1px; border-color: transparent transparent var(--color) var(--color); }
-.corner-br { bottom:-1px; right:-1px; border-color: transparent var(--color) var(--color) transparent; }
+  .video-layer video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    filter: saturate(0.75) brightness(0.55);
+    /* Insert your looping premise video as the src of the <video> tag below.
+       Recommended: 1920x1080+, muted, 15-30s seamless loop, restrained/cinematic footage. */
+  }
 
-.clip-button { clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+  .video-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(10,10,12,0.2) 0%, rgba(10,10,12,0.72) 55%, rgba(10,10,12,0.96) 100%),
+      linear-gradient(180deg, rgba(10,10,12,0.82) 0%, rgba(10,10,12,0.5) 15%, rgba(10,10,12,0.5) 85%, rgba(10,10,12,0.94) 100%);
+    pointer-events: none;
+  }
 
-.text-glow-magenta { text-shadow: 0 0 10px rgba(124,92,255,0.5); }
-.text-glow-cyan { text-shadow: 0 0 10px rgba(61,165,255,0.5); }
+  /* subtle film grain, premium not decorative */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.035;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
 
-::-webkit-scrollbar { width:6px; }
-::-webkit-scrollbar-track { background:#0A0B1F; }
-::-webkit-scrollbar-thumb { background:rgba(56,189,248,0.3); border-radius:3px; }
-::-webkit-scrollbar-thumb:hover { background:rgba(56,189,248,0.6); }
+  /* ---------- LOADER ---------- */
+  #loader {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--void);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    transition: opacity 0.9s ease, visibility 0.9s ease;
+  }
 
-/* ---------- MAGIC LAYER ---------- */
+  #loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 
-/* scroll reveal */
-.reveal { opacity:0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
-.reveal.visible { opacity:1; transform: translateY(0); }
-.reveal-delay-1 { transition-delay:.1s } .reveal-delay-2 { transition-delay:.2s } .reveal-delay-3 { transition-delay:.3s }
+  .loader-line {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--ink-dim);
+    opacity: 0;
+    text-align: center;
+    text-transform: uppercase;
+  }
 
-/* hero title cinematic entrance */
-@keyframes heroLine {
-  from { opacity:0; transform: translateY(40px); filter: blur(8px); }
-  to   { opacity:1; transform: translateY(0);   filter: blur(0); }
-}
-.hero-line-1 { animation: heroLine 1s .3s cubic-bezier(.16,1,.3,1) both; }
-.hero-line-2 { animation: heroLine 1s .55s cubic-bezier(.16,1,.3,1) both; }
-.hero-sub    { animation: heroLine 1s .85s cubic-bezier(.16,1,.3,1) both; }
-.hero-cta    { animation: heroLine 1s 1.1s cubic-bezier(.16,1,.3,1) both; }
-.hero-eyebrow{ animation: heroLine 1s .15s cubic-bezier(.16,1,.3,1) both; }
+  .loader-bar-track {
+    width: min(220px, 60vw);
+    height: 1px;
+    background: var(--hairline);
+    position: relative;
+    overflow: hidden;
+  }
 
-/* shimmering gradient on OUR WORLD */
-@keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-.magic-text {
-  background: linear-gradient(90deg, #7C5CFF, #B39DFF, #3DA5FF, #7C5CFF);
-  background-size: 300% 100%;
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  animation: shimmer 6s ease infinite;
-  filter: drop-shadow(0 0 14px rgba(124,92,255,0.45));
-}
+  .loader-bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0%;
+    background: var(--gold);
+    animation: fillBar 4.2s ease forwards;
+  }
 
-/* scanline drifting over hero */
-@keyframes scan { 0% { top:-10%; } 100% { top:110%; } }
-.scanline {
-  position:absolute; left:0; right:0; height:120px;
-  background: linear-gradient(to bottom, transparent, rgba(61,165,255,0.06), transparent);
-  animation: scan 7s linear infinite; pointer-events:none;
-}
+  @keyframes fillBar { to { width: 100%; } }
 
-/* live dot */
-@keyframes blinkDot { 0%,100%{opacity:1} 50%{opacity:.2} }
-.live-dot { animation: blinkDot 1.4s infinite; }
+  .skip-loader {
+    position: absolute;
+    bottom: 28px;
+    right: 28px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    background: none;
+    border: 1px solid var(--hairline);
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease;
+  }
+  .skip-loader:hover { color: var(--ink); border-color: var(--hairline-strong); }
 
-/* glitch flicker for the timestamp */
-@keyframes flick { 0%,93%,100%{opacity:1} 94%{opacity:.4} 96%{opacity:.9} 98%{opacity:.3} }
-.flicker { animation: flick 5s infinite; }
+  /* ---------- HUD STATUS BAR ---------- */
+  .hud {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px clamp(20px, 4vw, 56px);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    pointer-events: none;
+    border-bottom: 1px solid var(--hairline);
+  }
 
-/* status ring rotation */
-@keyframes spinSlow { to { transform: rotate(360deg); } }
-@keyframes spinRev  { to { transform: rotate(-360deg); } }
+  .hud-brand {
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    font-size: 12px;
+  }
 
-/* timeline entry pop-in */
-@keyframes slideIn { from { opacity:0; transform: translateX(-16px); } to { opacity:1; transform:none; } }
-.timeline-enter { animation: slideIn .5s cubic-bezier(.16,1,.3,1) both; }
+  .hud-metric {
+    display: flex;
+    gap: 7px;
+    align-items: baseline;
+  }
 
-/* value tick flash */
-@keyframes tickFlash { 0%{ color:#3DA5FF; text-shadow:0 0 8px rgba(61,165,255,.8);} 100%{ color:inherit; text-shadow:none;} }
-.tick { animation: tickFlash .7s ease-out; }
+  .hud-metric .value {
+    color: var(--ink-dim);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.6s ease;
+  }
 
-/* number counter glow underline */
-.metric-val { transition: color .3s; }
+  .hud-metric.alert .value {
+    color: var(--alert);
+  }
 
-/* floating particles container behind everything */
-#stardust { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5; }
-header, main, footer { position:relative; z-index:1; }
+  .hud-metrics {
+    display: flex;
+    gap: clamp(18px, 3vw, 36px);
+  }
 
-/* copilot voice bars */
-@keyframes voice { 0%,100%{transform:scaleY(.3)} 50%{transform:scaleY(1)} }
-.voice-bar { transform-origin:bottom; animation: voice 1s ease-in-out infinite; }
+  @media (max-width: 640px) {
+    .hud-metrics { display: none; }
+  }
 
-/* risk gauge pulse */
-@keyframes riskPulse { 0%,100%{ filter:drop-shadow(0 0 4px rgba(124,92,255,.4)); } 50%{ filter:drop-shadow(0 0 14px rgba(124,92,255,.8)); } }
-.risk-glow { animation: riskPulse 3s ease-in-out infinite; }
+  /* ---------- CLICK-TO-ADVANCE STAGE ---------- */
+  .story {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    width: 100vw;
+    cursor: pointer;
+  }
 
-/* cursor blink for typed text */
-.type-cursor::after { content:'▍'; color:#3DA5FF; animation: blinkDot 1s infinite; }
+  .beat {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    pointer-events: none;
+  }
 
-/* ---------- GLITCH HOVER (RGB split) ---------- */
-@keyframes glitchFlicker {
-  0%,100% { text-shadow:none; transform:translate(0,0); }
-  20% { text-shadow:-2px 0 #7C5CFF, 2px 0 #3DA5FF; transform:translate(-1px,0); }
-  40% { text-shadow:2px 0 #7C5CFF, -2px 0 #3DA5FF; transform:translate(1px,0); }
-  60% { text-shadow:-1px 0 #3DA5FF, 1px 0 #7C5CFF; transform:translate(0,0); }
-  80% { text-shadow:none; transform:translate(0,0); }
-}
-.glitch-hover { cursor:default; }
-.glitch-hover:hover { animation: glitchFlicker .4s linear infinite; }
+  .beat-inner {
+    max-width: 760px;
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.9s cubic-bezier(0.16,1,0.3,1),
+      transform 0.9s cubic-bezier(0.16,1,0.3,1);
+  }
 
-/* ---------- SPLIT-CHAR TEXT REVEAL ---------- */
-.split-chars { overflow:hidden; display:inline-block; }
-.split-chars .ch {
-  display:inline-block;
-  transform: translateY(110%);
-  opacity:0;
-  transition: transform .7s cubic-bezier(.16,1,.3,1), opacity .7s cubic-bezier(.16,1,.3,1);
-}
-.split-chars.chars-in .ch { transform:translateY(0); opacity:1; }
+  .beat.active {
+    pointer-events: auto;
+  }
+  .beat.active .beat-inner {
+    opacity: 1;
+    transform: translateY(0);
+  }
 
-/* ---------- CLIP-PATH WIPE TRANSITIONS ---------- */
-@keyframes wipeIn {
-  from { clip-path: inset(0 0 100% 0); }
-  to   { clip-path: inset(0 0 0% 0); }
-}
-.wipe-title {
-  position: relative;
-  clip-path: inset(0 0 100% 0);
-  transition: clip-path .8s cubic-bezier(.16,1,.3,1);
-}
-.wipe-title.wiped { clip-path: inset(0 0 0% 0); }
+  .beat.exit-up .beat-inner {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
 
-/* ---------- INFINITE AGENT STREAM ---------- */
-.marquee-wrap {
-  overflow: hidden;
-  padding: 34px 0;
-  /* soft edge fades so cards dissolve in/out instead of hard-clipping */
-  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-          mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-}
-.marquee-track {
-  display: flex;
-  gap: 24px;
-  width: max-content;
-  will-change: transform;
-  backface-visibility: hidden;
-}
-.agent-card {
-  --oy: 0px; --rot: 0deg;
-  flex: 0 0 340px;
-  width: 340px;
-  padding: 0; overflow: hidden;
-  transform: translateY(var(--oy)) rotate(var(--rot));
-  transition: border-color .3s, box-shadow .3s;
-  animation: cardBob 7s ease-in-out infinite;
-  animation-delay: var(--bob-delay, 0s);
-}
-/* gentle vertical breathing layered on the base offset */
-@keyframes cardBob {
-  0%, 100% { transform: translateY(var(--oy)) rotate(var(--rot)); }
-  50%      { transform: translateY(calc(var(--oy) - 8px)) rotate(calc(var(--rot) * -1)); }
-}
-.agent-card:hover { border-color: rgba(61,165,255,0.6); box-shadow: 0 20px 50px -20px rgba(61,165,255,0.25), 0 0 20px rgba(61,165,255,0.1); }
-.agent-card .agent-clip video { transform: scale(1.05); transition: transform .8s ease; }
-.agent-card:hover .agent-clip video { transform: scale(1.12); }
+  .beat-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    opacity: 0.9;
+  }
 
-/* ---------- CONFLICT DETECTOR MAGIC ---------- */
-.data-rain {
-  position:absolute; inset:0; pointer-events:none; opacity:.35; overflow:hidden;
-  background-image: repeating-linear-gradient(180deg, rgba(61,165,255,0.12) 0 2px, transparent 2px 26px);
-  background-size: 3px 100%;
-  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 22px);
-  mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 22px);
-  animation: rainFall 3s linear infinite;
-}
-.data-rain-magenta { background-image: repeating-linear-gradient(180deg, rgba(124,92,255,0.12) 0 2px, transparent 2px 26px); }
-@keyframes rainFall { to { background-position: 0 52px; } }
+  .beat-text {
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--ink);
+  }
 
-@keyframes resolvedFlash {
-  0% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
-  30% { box-shadow: 0 0 40px 6px rgba(16,185,129,0.5); }
-  100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
-}
-.resolved-flash { animation: resolvedFlash 1.4s ease-out; }
-@keyframes overrideShake {
-  0%,100%{transform:translateX(0)} 20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)}
-}
-.override-shake { animation: overrideShake .45s ease; }
+  .beat-text.huge {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(46px, 8vw, 96px);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  .beat-text.large {
+    font-family: var(--font-body);
+    font-size: clamp(22px, 3.2vw, 34px);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+  .beat-text.medium {
+    font-family: var(--font-body);
+    font-size: clamp(17px, 2vw, 21px);
+    font-weight: 400;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  .beat-text.pivot {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(38px, 6vw, 68px);
+    font-weight: 400;
+    color: var(--ink);
+  }
 
-/* toast notifications */
-#toastStack { position:fixed; bottom:24px; right:24px; z-index:100; display:flex; flex-direction:column; gap:8px; }
-.toast {
-  font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.08em;
-  background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(15,23,42,0.8));
-  border:1px solid; border-radius:8px; padding:10px 14px; min-width:260px;
-  backdrop-filter: blur(10px); display:flex; align-items:center; gap:10px;
-  animation: toastIn .4s cubic-bezier(.16,1,.3,1) both;
-}
-@keyframes toastIn { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform:none; } }
-.toast.out { animation: toastOut .4s ease both; }
-@keyframes toastOut { to { opacity:0; transform: translateX(40px); } }
-.toast .bar { position:absolute; bottom:0; left:0; height:2px; background:currentColor; animation: toastBar 3.5s linear both; }
-@keyframes toastBar { from{width:100%} to{width:0} }
+  /* Beat 3: data row — hairline dividers, no cards, no color-pop */
+  .data-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 40px;
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+  }
 
-/* button ripple/charging */
-@keyframes chargeUp { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-.charging {
-  background-image: linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%) !important;
-  background-size: 200% 100% !important;
-  animation: chargeUp .8s linear infinite;
-  pointer-events:none; opacity:.85;
-}
+  .datum {
+    font-family: var(--font-mono);
+    padding: 20px clamp(22px, 4vw, 40px);
+    border-left: 1px solid var(--hairline);
+  }
+  .datum:first-child { border-left: none; }
 
-/* rapid action working state */
-.action-busy { position:relative; overflow:hidden; }
-.action-busy::after {
-  content:''; position:absolute; bottom:0; left:0; height:2px; width:100%;
-  background: linear-gradient(90deg, transparent, currentColor, transparent);
-  animation: chargeUp 1s linear infinite; background-size: 200% 100%;
-}
-.action-done { border-color:#10B981 !important; color:#10B981 !important; }
+  .datum .num {
+    display: block;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(26px, 3vw, 36px);
+    color: var(--ink);
+    font-weight: 400;
+  }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
-}
+  .datum .label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
 
-/* ---------- PRELOADER ("Load Norris" style intro gate) ---------- */
-#preloader {
-  position:fixed; inset:0; z-index:300; background:#0A0B1F;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
-  transition: opacity .6s ease, visibility .6s ease;
-}
-#preloader.loader-hide { opacity:0; visibility:hidden; pointer-events:none; }
-.loader-logo { font-family:'JetBrains Mono',monospace; font-size:14px; letter-spacing:.3em; color:#F8FAFC; }
-.loader-bar-track { width:220px; height:2px; background:rgba(56,189,248,0.15); border-radius:2px; overflow:hidden; }
-.loader-bar-fill { height:100%; width:0%; background:linear-gradient(90deg,#7C5CFF,#3DA5FF); transition:width .25s ease; box-shadow:0 0 10px rgba(61,165,255,.6); }
-.loader-status { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.15em; color:#94A3B8; text-transform:uppercase; min-height:14px; }
-body.loading { overflow:hidden; }
+  /* Beat 4: SYNAPSE reveal with orbit ring, not a glowing blob */
+  .synapse-mark {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+    justify-content: center;
+  }
 
-/* ---------- NAV LINK HOVER REVEAL (clip-path descriptor) ---------- */
-.nav-reveal { position:relative; }
-.nav-reveal .nav-tip {
-  position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:10px;
-  width:max-content; max-width:180px; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.08em;
-  color:#3DA5FF; background:rgba(10,14,23,0.95); border:1px solid rgba(61,165,255,0.3); border-radius:4px;
-  padding:6px 10px; text-align:center; text-transform:none;
-  clip-path: inset(0 0 100% 0);
-  transition: clip-path .35s cubic-bezier(.16,1,.3,1);
-  pointer-events:none;
-}
-.nav-reveal:hover .nav-tip { clip-path: inset(0 0 0% 0); }
+  .orbit-ring {
+    width: 54px;
+    height: 54px;
+    animation: spin 14s linear infinite;
+  }
+  .orbit-ring circle {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 1;
+    stroke-dasharray: 3 7;
+    opacity: 0.75;
+  }
+  .orbit-ring .core {
+    stroke-dasharray: none;
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+    opacity: 0.4;
+  }
+  .orbit-ring.critical circle { stroke: var(--alert); }
+  .orbit-ring.critical { animation-duration: 4.5s; }
 
-/* ---------- MOBILE ROTATE-DEVICE PROMPT ---------- */
-#rotatePrompt {
-  position:fixed; inset:0; z-index:250; background:#0A0B1F;
-  display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; text-align:center; padding:2rem;
-}
-#rotatePrompt.show { display:flex; }
-.rotate-icon { animation: rotateHint 1.8s ease-in-out infinite; }
-@keyframes rotateHint { 0%,100%{ transform:rotate(0deg); } 50%{ transform:rotate(90deg); } }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
 
-/* bold keyword highlight accent (mission parameters copy) */
-.kw-highlight { color:#F8FAFC; font-weight:600; }
+  .wordmark {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: clamp(40px, 7vw, 72px);
+    letter-spacing: 0.06em;
+  }
+
+  /* Beat 8 — CTA handoff */
+  .cta-button {
+    margin-top: 40px;
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--void);
+    background: var(--ink);
+    border: none;
+    border-radius: 2px;
+    padding: 16px 36px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, background 0.3s ease;
+    position: relative;
+    z-index: 5;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.45);
+    background: var(--gold);
+  }
+
+  /* ---------- NAV: progress lines ---------- */
+  .nav-dots {
+    position: fixed;
+    right: clamp(16px, 3vw, 44px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .nav-dot {
+    width: 1px;
+    height: 16px;
+    background: var(--hairline-strong);
+    transition: background 0.5s ease, height 0.5s ease;
+    cursor: pointer;
+  }
+
+  .nav-dot.active {
+    background: var(--gold);
+    height: 26px;
+  }
+
+  .advance-cue {
+    position: fixed;
+    bottom: 34px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.8;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .advance-cue.hide { opacity: 0; }
+
+  .advance-cue::after {
+    content: '';
+    width: 1px;
+    height: 20px;
+    background: var(--hairline-strong);
+  }
 </style>
 </head>
-<body class="loading min-h-screen bg-grid text-nexus-textBright text-sm antialiased selection:bg-nexus-cyan selection:text-nexus-bg overflow-x-hidden">
+<body>
 
-<!-- BEGIN: Preloader -->
-<div id="preloader">
-  <div class="loader-logo glitch-hover">AEGIS NEXUS</div>
-  <div class="loader-bar-track"><div class="loader-bar-fill" id="loaderFill"></div></div>
-  <div class="loader-status" id="loaderStatus">INITIALIZING SWARM UPLINK...</div>
-</div>
-<!-- END: Preloader -->
+  <!-- ============ LOADER ============ -->
+  <div id="loader">
+    <div class="loader-line" id="load-1">Initializing Synapse</div>
+    <div class="loader-bar-track"><div class="loader-bar-fill"></div></div>
+    <button class="skip-loader" id="skip-btn">Skip</button>
+  </div>
 
-<!-- BEGIN: Rotate device prompt -->
-<div id="rotatePrompt">
-  <svg class="w-12 h-12 text-nexus-cyan rotate-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-  <p class="font-mono text-xs tracking-widest text-white uppercase">Rotate your device</p>
-  <p class="font-mono text-[10px] text-nexus-text tracking-wide max-w-xs">Aegis Nexus is optimized for landscape orientation on mobile.</p>
-</div>
-<!-- END: Rotate device prompt -->
+  <!-- ============ BACKGROUND VIDEO (looped) ============ -->
+  <div class="video-layer">
+    <!-- Replace src below with your premise video file -->
+    <video autoplay muted loop playsinline>
+      <source src="your-video-file.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-overlay"></div>
+  <div class="grain"></div>
 
-<canvas id="stardust"></canvas>
-
-<!-- BEGIN: MainHeader -->
-<header class="fixed top-0 inset-x-0 z-50 bg-nexus-bg/80 backdrop-blur-md border-b border-nexus-border h-16 flex items-center justify-between px-6">
-<div class="flex items-center gap-3">
-<div class="w-9 h-9 rounded-full border border-nexus-magenta flex items-center justify-center relative shadow-neon-magenta">
-<svg class="w-5 h-5 text-nexus-magenta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-  <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"></circle>
-  <circle cx="12" cy="12" r="4.2" stroke-width="1.1" opacity="0.85"></circle>
-  <ellipse cx="12" cy="12" rx="9.2" ry="3.6" stroke-width="1" opacity="0.75"></ellipse>
-  <ellipse cx="12" cy="12" rx="9.2" ry="3.6" stroke-width="1" opacity="0.55" transform="rotate(60 12 12)"></ellipse>
-  <ellipse cx="12" cy="12" rx="9.2" ry="3.6" stroke-width="1" opacity="0.55" transform="rotate(120 12 12)"></ellipse>
-</svg>
-</div>
-<div>
-<h1 class="text-white font-bold tracking-[0.06em] leading-none glitch-hover text-base">AEGIS <span class="text-nexus-magenta">NEXUS</span></h1>
-<p class="text-[10px] text-nexus-text/80 font-serif italic tracking-wide mt-1">AI Agent Swarm Control Center</p>
-</div>
-</div>
-<nav class="hidden md:flex items-center gap-8 text-xs font-mono font-medium tracking-wider text-nexus-text">
-<a class="nav-reveal text-white border-b-2 border-nexus-magenta pb-1 transition-colors" href="#overview">OVERVIEW<span class="nav-tip">System-wide status at a glance</span></a>
-<a class="nav-reveal hover:text-white transition-colors" href="#agents">AGENTS<span class="nav-tip">Browse the live swarm roster</span></a>
-<a class="nav-reveal hover:text-white transition-colors" href="#conflicts">CONFLICTS<span class="nav-tip">Active resource contentions</span></a>
-<a class="nav-reveal hover:text-white transition-colors" href="#simulation">SIMULATION<span class="nav-tip">Run predictive risk models</span></a>
-<a class="nav-reveal hover:text-white transition-colors" href="#analytics">ANALYTICS<span class="nav-tip">Historical trends &amp; charts</span></a>
-<a class="nav-reveal hover:text-white transition-colors" href="#about">ABOUT<span class="nav-tip">Project &amp; protocol details</span></a>
-</nav>
-<div class="flex items-center gap-4">
-<button class="w-8 h-8 rounded-full border border-nexus-border flex items-center justify-center text-nexus-text hover:text-white hover:border-nexus-cyan transition-colors relative">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-<span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-nexus-magenta rounded-full live-dot"></span>
-</button>
-<div class="hidden lg:block text-right font-mono text-[10px]">
-<div class="text-nexus-text flex items-center justify-end gap-1.5"><span class="w-1.5 h-1.5 bg-nexus-success rounded-full live-dot"></span>SYSTEM TIME</div>
-<div class="text-nexus-magenta font-bold flicker" id="sysClock">2148.07.16 | 14:32:08</div>
-</div>
-</div>
-</header>
-<!-- END: MainHeader -->
-
-<!-- BEGIN: Hero Section (full-screen video) -->
-<section class="relative h-screen w-full overflow-hidden">
-  <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover">
-    <source src="assets/space.mp4" type="video/mp4">
-  </video>
-  <div class="absolute inset-0 bg-nexus-bg/60"></div>
-  <div class="absolute inset-0 bg-gradient-to-t from-nexus-bg via-transparent to-nexus-bg/80"></div>
-  <div class="scanline"></div>
-
-  <div class="relative z-10 h-full flex flex-col justify-center px-6 max-w-[1600px] mx-auto">
-    <div class="hero-eyebrow flex items-center gap-2 text-nexus-magenta text-xs font-mono font-bold tracking-widest mb-4">
-      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
-      HUMAN <span class="text-nexus-text">LAYER PROTOCOL</span>
-    </div>
-    <h2 class="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-bold uppercase leading-[0.95] mb-6 tracking-wide">
-      <span class="block split-chars" id="heroSplit">SUPERVISE THE MINDS</span>
-      <span class="hero-line-2 block normal-case font-serif italic font-normal">that run <span class="magic-text">our world</span></span>
-    </h2>
-    <p class="hero-sub text-nexus-text text-base max-w-lg mb-2 leading-relaxed">
-      In 2148, thousands of autonomous AI agents manage the complex systems of our city. You are the human layer of control.
-    </p>
-    <p class="hero-sub font-mono text-[11px] text-nexus-cyan/80 mb-8 h-4 type-cursor" id="heroTyper"></p>
-    <div class="hero-cta flex items-center gap-4 font-mono">
-      <button class="clip-button bg-gradient-to-r from-nexus-magenta to-violet-600 text-white px-8 py-3 text-xs font-bold tracking-widest hover:shadow-neon-magenta hover:scale-[1.03] transition-all flex items-center gap-2">
-        LAUNCH CONTROL CENTER
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-      </button>
-      <button class="clip-button border border-nexus-border bg-nexus-surface hover:bg-nexus-surfaceHover text-white px-6 py-3 text-xs font-bold tracking-widest transition-all flex items-center gap-2">
-        <svg class="w-4 h-4 text-nexus-cyan" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" fill-rule="evenodd"></path></svg>
-        WATCH OVERVIEW
-      </button>
+  <!-- ============ HUD ============ -->
+  <div class="hud">
+    <div class="hud-brand">SYNAPSE</div>
+    <div class="hud-metrics">
+      <div class="hud-metric" id="metric-harmony">
+        <span>Harmony</span><span class="value">96.2%</span>
+      </div>
+      <div class="hud-metric">
+        <span>Worlds</span><span class="value">47</span>
+      </div>
+      <div class="hud-metric" id="metric-incidents">
+        <span>Incidents</span><span class="value">00</span>
+      </div>
+      <div class="hud-metric">
+        <span>Sync</span><span class="value" id="sync-clock">00:00:00</span>
+      </div>
     </div>
   </div>
 
-  <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 text-nexus-text animate-bounce">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 14l-7 7m0 0l-7-7m7 7V3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-  </div>
-</section>
-<!-- END: Hero Section -->
+  <!-- ============ CLICK-TO-ADVANCE STORY ============ -->
+  <main class="story" id="story">
 
-<main class="pb-12 px-6 max-w-[1600px] mx-auto space-y-6 pt-12">
+    <section class="beat" id="beat-1">
+      <div class="beat-inner">
+        <div class="beat-eyebrow">Transmission Log · 00:01</div>
+        <div class="beat-text huge">Year 2148.</div>
+      </div>
+    </section>
 
-<!-- Mission Parameters -->
-<section class="cyber-panel rounded-2xl p-6 reveal">
-  <div class="space-y-2">
-    <h4 class="text-[11px] font-mono font-bold tracking-[0.1em] text-nexus-magenta uppercase flex items-center gap-2">
-      <span class="w-1.5 h-1.5 bg-nexus-magenta rounded-full live-dot"></span>MISSION PARAMETERS
-    </h4>
-    <p class="text-sm text-nexus-text leading-relaxed opacity-70">Initializing tactical oversight protocol. Synchronizing neural agent swarms across all seven primary districts. Current mission parameters focus on <span class="kw-highlight">grid stability</span> and <span class="kw-highlight">predictive conflict mitigation</span> within the central AI core corridor. Monitor swarm latency and system health for real-time adjustments. All tactical nodes are currently reporting <span class="kw-highlight">nominal throughput</span>, though localized variance in the tertiary processing clusters suggests a potential <span class="kw-highlight">bottleneck</span> in the upcoming simulation cycle.</p>
-  </div>
-</section>
+    <section class="beat" id="beat-2">
+      <div class="beat-inner">
+        <div class="beat-text large">Humanity no longer governs its worlds alone.</div>
+      </div>
+    </section>
 
-<!-- Top Metrics -->
-<section class="grid grid-cols-2 md:grid-cols-5 gap-4 cyber-panel rounded-2xl p-6 reveal">
-<div class="border-r border-nexus-border/50 pr-4">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">TOTAL AGENTS</h3>
-<p class="text-3xl font-light text-white metric-val" id="mTotal" data-count="12847">0</p>
-</div>
-<div class="border-r border-nexus-border/50 px-4">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">ACTIVE AGENTS</h3>
-<p class="text-3xl font-light text-white metric-val" id="mActive" data-count="11243">0</p>
-</div>
-<div class="border-r border-nexus-border/50 px-4">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">ACTIVE CONFLICTS</h3>
-<p class="text-3xl font-light text-nexus-magenta metric-val" id="mConflicts" data-count="23">0</p>
-</div>
-<div class="border-r border-nexus-border/50 px-4">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">SYSTEM HEALTH</h3>
-<p class="text-3xl font-light text-nexus-success metric-val"><span id="mHealth" data-count="94.2">0</span>%</p>
-</div>
-<div class="px-4">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">OVERALL RISK LEVEL</h3>
-<div class="flex items-center gap-3">
-<p class="text-xl font-bold text-nexus-amber tracking-wider" id="mRisk">MEDIUM</p>
-<div class="flex gap-1 h-1 flex-1" id="riskBars">
-<div class="bg-nexus-amber h-full w-full transition-colors duration-500"></div>
-<div class="bg-nexus-amber h-full w-full transition-colors duration-500"></div>
-<div class="bg-nexus-border h-full w-full transition-colors duration-500"></div>
-<div class="bg-nexus-border h-full w-full transition-colors duration-500"></div>
-</div>
-</div>
-</div>
-</section>
-
-<!-- Core AI Ecosystem -->
-<section class="reveal">
-<div class="flex items-center gap-2 text-nexus-magenta text-xs font-mono font-bold tracking-widest mb-4">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-CORE AI ECOSYSTEM
-</div>
-<div class="marquee-wrap" id="marqueeWrap">
-  <div class="marquee-track" id="agentGrid"></div>
-</div>
-<div class="cyber-panel p-4 rounded-2xl flex items-center justify-center min-h-[80px] cyber-panel-magenta hover:bg-nexus-surfaceHover transition-colors cursor-pointer group mt-6">
-  <div class="flex items-center justify-between w-full px-4">
-    <span class="font-mono text-xs tracking-widest text-white group-hover:text-nexus-magenta transition-colors uppercase">VIEW ALL AGENTS</span>
-    <div class="w-8 h-8 rounded border border-nexus-magenta flex items-center justify-center text-nexus-magenta group-hover:bg-nexus-magenta group-hover:text-white transition-all shadow-neon-magenta">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-    </div>
-  </div>
-</div>
-</section>
-
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-<!-- City Agent Map -->
-<section class="cyber-panel rounded-2xl p-6 lg:col-span-2 flex flex-col reveal">
-<div class="flex justify-between items-start mb-4">
-<div>
-<h3 class="font-bold text-white text-lg tracking-wide mb-1 wipe-title">CITY AGENT MAP</h3>
-<p class="text-xs text-nexus-text font-mono uppercase flex items-center gap-2"><span class="w-1.5 h-1.5 bg-nexus-cyan rounded-full live-dot"></span>Live network overview</p>
-</div>
-<span class="font-mono text-[10px] text-nexus-cyan border border-nexus-cyan/30 px-2 py-1 rounded bg-nexus-cyan/5" id="mapNodes">7 DISTRICTS</span>
-</div>
-<div class="flex-1 min-h-[340px] relative border border-nexus-border/30 rounded bg-nexus-bg overflow-hidden flex">
-<iframe id="cityMap" src="map_v2.html" title="City Agent Map" class="flex-1 w-full h-full border-0" loading="lazy"></iframe>
-<div class="hidden md:flex w-48 bg-nexus-surface border-l border-nexus-border/50 p-4 font-mono text-xs flex-col justify-between">
-<div class="space-y-3" id="mapLegend"></div>
-<button class="mt-4 text-nexus-magenta hover:text-white flex items-center justify-between border-t border-nexus-border/50 pt-3 w-full transition-colors">
-VIEW FULL MAP <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</div>
-</div>
-</section>
-
-<!-- System Health -->
-<section class="cyber-panel rounded-2xl p-6 flex flex-col reveal reveal-delay-1">
-<div class="mb-6">
-<h3 class="font-bold text-white text-lg tracking-wide mb-1">SYSTEM HEALTH</h3>
-<p class="text-xs text-nexus-text font-mono uppercase">Overall city system status</p>
-</div>
-<div class="flex-1 flex flex-col items-center justify-center relative min-h-[200px]">
-<svg width="180" height="180" viewBox="0 0 180 180" class="risk-glow">
-  <circle cx="90" cy="90" r="78" fill="none" stroke="rgba(56,189,248,0.15)" stroke-width="6"/>
-  <circle id="healthRing" cx="90" cy="90" r="78" fill="none" stroke="url(#healthGrad)" stroke-width="6"
-    stroke-linecap="round" stroke-dasharray="490" stroke-dashoffset="490"
-    transform="rotate(-90 90 90)" style="transition: stroke-dashoffset 1.5s cubic-bezier(.16,1,.3,1)"/>
-  <circle cx="90" cy="90" r="66" fill="none" stroke="rgba(56,189,248,0.1)" stroke-width="1" stroke-dasharray="3 6" style="animation: spinSlow 30s linear infinite; transform-origin: 90px 90px;"/>
-  <defs>
-    <linearGradient id="healthGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#3DA5FF"/><stop offset="100%" stop-color="#10B981"/>
-    </linearGradient>
-  </defs>
-</svg>
-<div class="absolute text-center">
-  <span class="text-4xl font-light text-white block leading-none"><span id="healthNum">94.2</span><span class="text-lg text-nexus-text">%</span></span>
-  <span class="text-[10px] text-nexus-cyan font-mono uppercase tracking-widest block mt-1" id="healthLabel">OPTIMAL</span>
-</div>
-</div>
-<div class="grid grid-cols-2 gap-4 mt-6 border-t border-nexus-border/30 pt-4 font-mono text-xs">
-<div class="bg-nexus-surface border border-nexus-border/30 p-3 rounded-xl">
-<p class="text-nexus-text mb-1">RISK LEVEL</p>
-<p class="text-nexus-amber font-bold text-sm" id="riskMini">MEDIUM</p>
-</div>
-<div class="bg-nexus-surface border border-nexus-border/30 p-3 rounded-xl">
-<p class="text-nexus-text mb-1">ACTIVE ALERTS</p>
-<p class="text-nexus-magenta font-bold text-sm" id="alertCount">23</p>
-</div>
-</div>
-<button class="w-full mt-4 border border-nexus-magenta/50 text-nexus-magenta hover:bg-nexus-magenta/10 py-2 rounded text-xs font-mono tracking-widest flex items-center justify-center gap-2 transition-colors">
-VIEW ALL ALERTS <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</section>
-</div>
-
-<!-- Conflict Detector -->
-<section class="cyber-panel cyber-panel-magenta rounded-2xl p-6 relative reveal">
-<div class="corner-decor corner-tl" style="--color:#7C5CFF;"></div><div class="corner-decor corner-br" style="--color:#7C5CFF;"></div>
-<div class="absolute top-2 right-4 flex gap-4 font-mono text-[9px] text-nexus-magenta/50 uppercase tracking-widest pointer-events-none">
-<span>LAT: 34.0522 N</span><span>LONG: 118.2437 W</span><span id="sigStrength">SIG: 98.4%</span>
-</div>
-<div class="flex justify-between items-start mb-6 relative z-10">
-<div>
-<h3 class="font-bold text-white text-lg tracking-wide mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-nexus-magenta animate-pulse">warning</span> CONFLICT DETECTOR</h3>
-<p class="text-xs text-nexus-text font-mono uppercase">High priority resource contention detected</p>
-</div>
-<div class="flex flex-col items-end gap-1">
-<span class="text-nexus-magenta font-mono text-xs border border-nexus-magenta px-2 py-1 rounded bg-nexus-magenta/10">ID: CNF-8942</span>
-<span class="text-[9px] font-mono text-nexus-text" id="conflictStamp">T-STAMP: 2148.07.16_14:32:08</span>
-</div>
-</div>
-<!-- entity selectors -->
-<div class="flex flex-wrap items-center gap-3 mb-4 relative z-10 font-mono text-[10px]">
-<span class="text-nexus-text uppercase tracking-widest">SIMULATE CONTENTION:</span>
-<select id="selA" class="bg-nexus-bg border border-nexus-cyan/40 text-nexus-cyan rounded px-2 py-1 focus:ring-nexus-cyan focus:border-nexus-cyan uppercase"></select>
-<span class="text-nexus-magenta font-black italic">VS</span>
-<select id="selB" class="bg-nexus-bg border border-nexus-magenta/40 text-nexus-magenta rounded px-2 py-1 focus:ring-nexus-magenta focus:border-nexus-magenta uppercase"></select>
-<span id="conflictStatus" class="ml-auto px-2 py-1 rounded border border-nexus-magenta/40 text-nexus-magenta bg-nexus-magenta/10 uppercase tracking-widest live-dot">⬤ ACTIVE CONTENTION</span>
-</div>
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch relative z-10" id="conflictArena">
-<div class="lg:col-span-4 cyber-panel p-4 rounded-xl flex flex-col justify-between min-h-[320px] relative overflow-hidden" id="entACard">
-<div class="absolute top-2 left-2 text-[8px] font-mono text-nexus-cyan/30" id="entATelem">ENTITY_A_TELEMETRY</div>
-<div class="data-rain" aria-hidden="true"></div>
-<div class="flex-1 flex flex-col items-center justify-center gap-4 relative z-10">
-<div class="relative">
-<div class="absolute -inset-3 border border-nexus-cyan/20 rounded-full" style="animation: spinSlow 8s linear infinite"></div>
-<div class="absolute -inset-6 border border-dashed border-nexus-cyan/10 rounded-full" style="animation: spinRev 14s linear infinite"></div>
-<div class="w-16 h-16 rounded-full border border-nexus-cyan flex items-center justify-center bg-nexus-bg shadow-neon-cyan"><span class="material-symbols-outlined text-nexus-cyan text-3xl" id="entAIcon">traffic</span></div>
-<div class="absolute -bottom-1 -right-1 w-6 h-6 bg-nexus-bg border border-nexus-cyan rounded-full flex items-center justify-center text-[10px] text-nexus-cyan font-bold">A</div>
-</div>
-<div class="text-center"><p class="font-bold text-white text-sm tracking-widest" id="entAName">TRAFFIC AI</p><p class="text-[10px] text-nexus-cyan font-mono uppercase mt-1" id="entADemand">REQ: +<span id="reqPower">120</span>MW POWER</p></div>
-<div class="w-full px-4">
-<div class="flex justify-between text-[9px] font-mono text-nexus-text mb-1"><span>PRIORITY</span><span id="entAPrio">LEVEL 4</span></div>
-<div class="w-full bg-nexus-bg h-1 rounded-full overflow-hidden"><div class="bg-nexus-cyan h-full transition-all duration-700" id="barA" style="width:75%"></div></div>
-</div>
-</div>
-</div>
-<div class="lg:col-span-1 flex flex-col items-center justify-center gap-2 py-4 relative">
-<!-- energy arc between entities -->
-<svg class="absolute inset-x-[-140px] top-1/2 -translate-y-1/2 h-24 w-[calc(100%+280px)] pointer-events-none hidden lg:block" viewBox="0 0 400 100" preserveAspectRatio="none">
-<path id="arcPath" d="M0 50 Q 100 20, 200 50 T 400 50" fill="none" stroke="rgba(124,92,255,0.25)" stroke-width="1"/>
-<circle id="arcPulse1" r="2.5" fill="#3DA5FF"><animateMotion dur="1.6s" repeatCount="indefinite"><mpath href="#arcPath"/></animateMotion></circle>
-<circle id="arcPulse2" r="2.5" fill="#7C5CFF"><animateMotion dur="1.6s" begin="0.8s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1"><mpath href="#arcPath"/></animateMotion></circle>
-</svg>
-<div class="h-full w-px bg-gradient-to-b from-transparent via-nexus-magenta/50 to-transparent"></div>
-<div class="relative flex items-center justify-center">
-<div class="absolute w-12 h-12 bg-nexus-magenta/20 rounded-full animate-ping" id="vsPing"></div>
-<div class="w-10 h-10 rounded-full border border-nexus-magenta bg-nexus-bg flex items-center justify-center z-10 shadow-neon-magenta" id="vsBadge"><span class="text-nexus-magenta font-black italic text-xs">VS</span></div>
-</div>
-<div class="h-full w-px bg-gradient-to-b from-transparent via-nexus-magenta/50 to-transparent"></div>
-</div>
-<div class="lg:col-span-4 cyber-panel p-4 rounded-xl flex flex-col justify-between min-h-[320px] relative overflow-hidden" id="entBCard">
-<div class="absolute top-2 right-2 text-[8px] font-mono text-nexus-magenta/30" id="entBTelem">ENTITY_B_TELEMETRY</div>
-<div class="data-rain data-rain-magenta" aria-hidden="true"></div>
-<div class="flex-1 flex flex-col items-center justify-center gap-4 relative z-10">
-<div class="relative">
-<div class="absolute -inset-3 border border-nexus-magenta/20 rounded-full" style="animation: spinRev 8s linear infinite"></div>
-<div class="absolute -inset-6 border border-dashed border-nexus-magenta/10 rounded-full" style="animation: spinSlow 14s linear infinite"></div>
-<div class="w-16 h-16 rounded-full border border-nexus-magenta flex items-center justify-center bg-nexus-bg shadow-neon-magenta"><span class="material-symbols-outlined text-nexus-magenta text-3xl" id="entBIcon">bolt</span></div>
-<div class="absolute -bottom-1 -left-1 w-6 h-6 bg-nexus-bg border border-nexus-magenta rounded-full flex items-center justify-center text-[10px] text-nexus-magenta font-bold">B</div>
-</div>
-<div class="text-center"><p class="font-bold text-white text-sm tracking-widest" id="entBName">GRID AI</p><p class="text-[10px] text-nexus-magenta font-mono uppercase mt-1" id="entBStatus">STATUS: DENYING</p></div>
-<div class="w-full px-4">
-<div class="flex justify-between text-[9px] font-mono text-nexus-text mb-1"><span>CAPACITY</span><span id="entBCap">CRITICAL</span></div>
-<div class="w-full bg-nexus-bg h-1 rounded-full overflow-hidden"><div class="bg-nexus-magenta h-full animate-pulse transition-all duration-700" id="barB" style="width:25%"></div></div>
-</div>
-</div>
-</div>
-<div class="lg:col-span-3 flex flex-col gap-4">
-<div class="cyber-panel p-4 rounded-xl flex-1 border-nexus-cyan/30">
-<h4 class="text-[10px] text-nexus-cyan font-mono uppercase mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-xs">psychology</span> NEURAL LOGIC TRACE</h4>
-<div class="flex gap-3 items-start">
-<div class="w-12 h-12 flex items-center justify-center border border-nexus-cyan/20 rounded bg-nexus-bg/50">
-<canvas id="traceWave" width="44" height="30"></canvas>
-</div>
-<p class="text-[11px] text-nexus-text italic leading-relaxed" id="logicTrace">"Traffic Agent requested more power from Grid Agent. Request denied due to hospital priority."</p>
-</div>
-</div>
-<div class="cyber-panel p-4 rounded-xl flex-1 border-nexus-magenta/30">
-<h4 class="text-[10px] text-nexus-text font-mono uppercase mb-3">RESOLUTION MATRIX</h4>
-<div class="space-y-2" id="resMatrix">
-<div class="flex items-center justify-between bg-nexus-bg/40 p-2 rounded border border-nexus-border/20"><span class="text-[10px] text-white font-mono">REROUTE POWER</span><span class="text-[9px] font-bold text-nexus-cyan border border-nexus-cyan/50 px-2 py-0.5 rounded">READY</span></div>
-<div class="flex items-center justify-between bg-nexus-bg/40 p-2 rounded border border-nexus-border/20"><span class="text-[10px] text-white font-mono">DELAY TRAFFIC</span><span class="text-[9px] font-bold text-nexus-amber border border-nexus-amber/50 px-2 py-0.5 rounded">PENDING</span></div>
-<div class="flex items-center justify-between bg-nexus-bg/40 p-2 rounded border border-nexus-border/20"><span class="text-[10px] text-white font-mono">CONSENSUS PROB.</span><span class="text-[9px] font-bold text-white px-2 py-0.5" id="consensusProb">64%</span></div>
-</div>
-</div>
-</div>
-</div>
-<div class="flex items-center justify-center gap-4 mt-6 font-mono text-xs">
-<button id="btnOverride" class="clip-button bg-nexus-magenta text-white px-10 py-2.5 font-bold tracking-widest hover:shadow-neon-magenta hover:scale-[1.04] transition-all">OVERRIDE</button>
-<button id="btnNegotiate" class="clip-button border border-nexus-border bg-nexus-surface hover:bg-nexus-surfaceHover text-white px-10 py-2.5 font-bold tracking-widest transition-all">NEGOTIATE</button>
-</div>
-</section>
-
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-<!-- Insights & Predictions -->
-<section class="cyber-panel rounded-2xl p-6 flex flex-col lg:col-span-2 reveal">
-<div class="flex justify-between items-start mb-6">
-<div>
-<h3 class="font-bold text-white text-lg tracking-wide mb-1">INSIGHTS &amp; PREDICTIONS</h3>
-<p class="text-xs text-nexus-text font-mono uppercase">AI-driven analysis</p>
-</div>
-<select class="bg-nexus-bg border border-nexus-border text-nexus-text text-xs font-mono rounded px-2 py-1 focus:ring-nexus-cyan focus:border-nexus-cyan"><option>TODAY</option><option>LAST 7 DAYS</option></select>
-</div>
-<div class="flex-1 min-h-[220px] border border-nexus-border/30 rounded bg-nexus-bg p-4 relative flex flex-col">
-<div class="flex justify-between text-[10px] text-nexus-text font-mono uppercase mb-2">
-<span>CONFLICTS OVER TIME</span>
-<span class="bg-nexus-surface px-2 py-0.5 rounded border border-nexus-border/50" id="chartBadge">23 Conflicts / 14:00</span>
-</div>
-<canvas id="conflictChart" class="flex-1 w-full"></canvas>
-</div>
-</section>
-
-<!-- Predictive Risk -->
-<section class="cyber-panel rounded-2xl p-6 flex flex-col cyber-panel-magenta lg:col-span-1 reveal reveal-delay-1">
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-4">PREDICTIVE RISK SCORE</h3>
-<div class="flex items-end gap-2 mb-4">
-<span class="text-5xl font-bold text-nexus-magenta leading-none risk-glow" id="riskScore">68%</span>
-<span class="text-nexus-magenta font-mono text-xs uppercase font-bold bg-nexus-magenta/10 px-2 py-0.5 rounded border border-nexus-magenta/30 mb-1">HIGH RISK</span>
-</div>
-<p class="text-sm text-nexus-text flex-1">Probability of critical conflict in next 6 hours</p>
-<div class="space-y-4 mt-6" id="riskFactors">
-<div><div class="flex justify-between text-xs font-mono mb-1"><span class="text-white">Power Demand Spike</span><span class="text-nexus-magenta rf-val">32%</span></div><div class="w-full bg-nexus-bg rounded-full h-1.5"><div class="bg-nexus-magenta h-1.5 rounded-full transition-all duration-1000 rf-bar" style="width:32%"></div></div></div>
-<div><div class="flex justify-between text-xs font-mono mb-1"><span class="text-white">Traffic Congestion</span><span class="text-nexus-amber rf-val">24%</span></div><div class="w-full bg-nexus-bg rounded-full h-1.5"><div class="bg-nexus-amber h-1.5 rounded-full transition-all duration-1000 rf-bar" style="width:24%"></div></div></div>
-<div><div class="flex justify-between text-xs font-mono mb-1"><span class="text-white">Water Supply Instability</span><span class="text-nexus-amber rf-val">18%</span></div><div class="w-full bg-nexus-bg rounded-full h-1.5"><div class="bg-nexus-amber h-1.5 rounded-full transition-all duration-1000 rf-bar" style="width:18%"></div></div></div>
-</div>
-<button class="w-full mt-6 border border-nexus-magenta bg-nexus-magenta/5 hover:bg-nexus-magenta/20 text-white py-2 rounded text-xs font-mono tracking-widest flex items-center justify-center gap-2 transition-colors">
-RUN SIMULATION <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</section>
-
-<!-- Aegis Copilot -->
-<section class="cyber-panel rounded-2xl p-6 flex flex-col border-nexus-cyan/50 lg:col-span-1 relative overflow-hidden reveal reveal-delay-2">
-<div class="absolute -right-10 -top-10 w-32 h-32 bg-nexus-cyan/10 rounded-full blur-2xl"></div>
-<h3 class="text-xs text-nexus-text font-mono uppercase tracking-widest mb-1">AI ASSISTANT</h3>
-<p class="font-bold text-white text-lg tracking-wide mb-6">AEGIS COPILOT</p>
-<div class="flex-1 flex flex-col items-center justify-center">
-<div class="w-20 h-20 rounded-full border border-nexus-cyan/30 flex items-center justify-center mb-4 relative">
-<div class="absolute inset-0 border border-nexus-cyan rounded-full border-t-transparent" style="animation: spinSlow 4s linear infinite"></div>
-<div class="absolute inset-2 border border-nexus-cyan/50 rounded-full border-b-transparent" style="animation: spinRev 3s linear infinite"></div>
-<svg class="w-8 h-8 text-nexus-cyan drop-shadow-[0_0_5px_rgba(61,165,255,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></svg>
-</div>
-<div class="flex items-end gap-0.5 h-4 mb-3">
-<div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:0s"></div>
-<div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.15s"></div>
-<div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.3s"></div>
-<div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.45s"></div>
-<div class="voice-bar w-0.5 h-4 bg-nexus-cyan/70" style="animation-delay:.6s"></div>
-</div>
-<p class="text-xs text-nexus-text text-center italic mb-4 min-h-[32px]" id="copilotSays">"All systems operational. How can I assist you today, Operator?"</p>
-</div>
-<button class="w-full border border-nexus-cyan/50 text-nexus-cyan hover:bg-nexus-cyan/10 py-2 rounded text-xs font-mono tracking-widest flex items-center justify-center gap-2 transition-colors">
-ASK AEGIS <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</section>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<!-- Emergency Timeline -->
-<section class="cyber-panel rounded-2xl p-6 md:col-span-2 reveal">
-<div class="flex justify-between items-start mb-6">
-<div>
-<h3 class="font-bold text-white text-lg tracking-wide mb-1 wipe-title">EMERGENCY TIMELINE</h3>
-<p class="text-xs text-nexus-text font-mono uppercase flex items-center gap-2"><span class="w-1.5 h-1.5 bg-nexus-magenta rounded-full live-dot"></span>Live incident log</p>
-</div>
-</div>
-<div class="space-y-4 font-mono text-xs max-h-[280px] overflow-y-auto pr-2" id="timeline"></div>
-<button class="mt-4 text-nexus-magenta hover:text-white font-mono text-xs flex items-center gap-2 transition-colors">
-VIEW FULL LOG <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</button>
-</section>
-
-<!-- Rapid Actions -->
-<section class="cyber-panel rounded-2xl p-6 md:col-span-1 reveal reveal-delay-1">
-<div class="mb-6">
-<h3 class="font-bold text-white text-lg tracking-wide mb-1">RAPID ACTIONS</h3>
-<p class="text-xs text-nexus-text font-mono uppercase">Human intervention tools</p>
-</div>
-<div class="space-y-3 font-mono text-xs">
-<button class="w-full bg-nexus-surface border border-nexus-border/50 hover:border-nexus-cyan hover:text-nexus-cyan hover:translate-x-1 rounded p-3 flex items-center gap-3 transition-all text-left text-white">
-<div class="w-6 h-6 rounded border border-current flex items-center justify-center opacity-50"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div>
-Reallocate Power
-</button>
-<button class="w-full bg-nexus-surface border border-nexus-border/50 hover:border-nexus-cyan hover:text-nexus-cyan hover:translate-x-1 rounded p-3 flex items-center gap-3 transition-all text-left text-white">
-<div class="w-6 h-6 rounded border border-current flex items-center justify-center opacity-50"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div>
-Schedule Traffic Reroute
-</button>
-<button class="w-full bg-nexus-surface border border-nexus-border/50 hover:border-nexus-cyan hover:text-nexus-cyan hover:translate-x-1 rounded p-3 flex items-center gap-3 transition-all text-left text-white">
-<div class="w-6 h-6 rounded border border-current flex items-center justify-center opacity-50"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div>
-Deploy Emergency Drones
-</button>
-<button class="w-full bg-nexus-surface border border-nexus-magenta/50 hover:border-nexus-magenta hover:translate-x-1 rounded p-3 flex items-center gap-3 transition-all text-left text-nexus-magenta">
-<div class="w-6 h-6 rounded border border-current flex items-center justify-center opacity-80"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div>
-Lockdown Security Zone
-</button>
-<button class="w-full bg-nexus-surface border border-nexus-amber/50 hover:border-nexus-amber hover:translate-x-1 rounded p-3 flex items-center gap-3 transition-all text-left text-nexus-amber">
-<div class="w-6 h-6 rounded border border-current flex items-center justify-center opacity-80"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div>
-Broadcast System Alert
-</button>
-</div>
-</section>
-</div>
-</main>
-
-<!-- Footer -->
-<footer class="border-t border-nexus-border/30 bg-nexus-bg mt-12 py-8 px-6 text-nexus-text text-xs">
-<div class="max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-<div>
-<div class="flex items-center gap-2 mb-4">
-<div class="w-6 h-6 rounded border border-nexus-magenta flex items-center justify-center">
-<svg class="w-4 h-4 text-nexus-magenta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-<div><span class="text-white font-bold tracking-wider block leading-tight">AEGIS NEXUS</span><span class="text-[9px] uppercase tracking-widest font-mono">Control Center</span></div>
-</div>
-</div>
-<div>
-<h4 class="text-white font-mono uppercase tracking-widest mb-4">PLATFORM</h4>
-<ul class="space-y-2"><li><a class="hover:text-white transition-colors" href="#">Overview</a></li><li><a class="hover:text-white transition-colors" href="#">Dashboard</a></li><li><a class="hover:text-white transition-colors" href="#">Agents</a></li><li><a class="hover:text-white transition-colors" href="#">Conflicts</a></li><li><a class="hover:text-white transition-colors" href="#">Simulation</a></li></ul>
-</div>
-<div>
-<h4 class="text-white font-mono uppercase tracking-widest mb-4">RESOURCES</h4>
-<ul class="space-y-2"><li><a class="hover:text-white transition-colors" href="#">Documentation</a></li><li><a class="hover:text-white transition-colors" href="#">API Reference</a></li><li><a class="hover:text-white transition-colors" href="#">Guides</a></li><li><a class="hover:text-white transition-colors" href="#">System Status</a></li></ul>
-</div>
-<div>
-<h4 class="text-white font-mono uppercase tracking-widest mb-4">STATUS</h4>
-<div class="flex items-center gap-2 mb-2"><div class="w-2 h-2 rounded-full bg-nexus-success shadow-neon-success live-dot"></div><span>All Systems Operational</span></div>
-<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-nexus-cyan shadow-neon-cyan"></div><span>Uptime: <span id="uptime">99.96</span>%</span></div>
-</div>
-</div>
-<div class="max-w-[1600px] mx-auto mt-8 pt-4 border-t border-nexus-border/30 text-center font-mono text-[10px]">© 2148 Aegis Nexus. All rights reserved.</div>
-</footer>
-
-<div id="toastStack"></div>
-<div id="cursorGlow" class="hidden lg:block" style="position:fixed;top:0;left:0;width:420px;height:420px;border-radius:50%;pointer-events:none;z-index:40;background:radial-gradient(circle, rgba(61,165,255,0.06), transparent 70%);transform:translate(-50%,-50%);transition:opacity .3s;opacity:0;"></div>
-
-<script>
-/* ============ UTILITIES ============ */
-const $ = id => document.getElementById(id);
-const rand = (a,b) => a + Math.random()*(b-a);
-const randInt = (a,b) => Math.floor(rand(a,b+1));
-function flash(el){ el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); }
-
-/* ============ PRELOADER ============ */
-(function(){
-  const fill = $('loaderFill'), status = $('loaderStatus'), loader = $('preloader');
-  const messages = ['INITIALIZING SWARM UPLINK...','SYNCING NEURAL MESH...','CALIBRATING SENSORS...','LOADING CITY GRID...','READY'];
-  let pct = 0, mi = 0;
-  const timer = setInterval(() => {
-    pct += rand(6, 16);
-    if(pct >= 100){
-      pct = 100;
-      clearInterval(timer);
-      status.textContent = messages[messages.length - 1];
-      fill.style.width = '100%';
-      setTimeout(() => {
-        loader.classList.add('loader-hide');
-        document.body.classList.remove('loading');
-      }, 350);
-      return;
-    }
-    fill.style.width = pct + '%';
-    mi = Math.min(messages.length - 2, Math.floor(pct / 25));
-    status.textContent = messages[mi];
-  }, 220);
-  /* safety net: never trap the user behind the preloader */
-  setTimeout(() => { loader.classList.add('loader-hide'); document.body.classList.remove('loading'); }, 4000);
-})();
-
-/* ============ ROTATE-DEVICE PROMPT ============ */
-(function(){
-  const prompt = $('rotatePrompt');
-  function checkOrientation(){
-    const isPortrait = window.innerHeight > window.innerWidth;
-    const isMobile = window.innerWidth < 768;
-    prompt.classList.toggle('show', isPortrait && isMobile);
-  }
-  window.addEventListener('resize', checkOrientation);
-  screen.orientation?.addEventListener('change', checkOrientation);
-  checkOrientation();
-})();
-
-
-/* ============ SYSTEM CLOCK (2148) ============ */
-function tickClock(){
-  const n = new Date();
-  const p = x => String(x).padStart(2,'0');
-  const s = `2148.${p(n.getMonth()+1)}.${p(n.getDate())} | ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
-  $('sysClock').textContent = s;
-  $('conflictStamp').textContent = `T-STAMP: ${s.replace(' | ','_')}`;
-}
-setInterval(tickClock, 1000); tickClock();
-
-/* ============ HERO TYPED STATUS ============ */
-const heroLines = [
-  '> uplink established :: 12,847 agents synchronized',
-  '> neural mesh integrity :: 99.2% — nominal',
-  '> district 7 anomaly resolved by swarm consensus',
-  '> quantum encryption layer :: rotating keys...',
-  '> operator presence detected. welcome back.'
-];
-let hIdx = 0, hChar = 0, hDel = false;
-function typeHero(){
-  const el = $('heroTyper'), line = heroLines[hIdx];
-  if(!hDel){ hChar++; if(hChar > line.length){ hDel = true; return setTimeout(typeHero, 2200); } }
-  else { hChar--; if(hChar === 0){ hDel = false; hIdx = (hIdx+1)%heroLines.length; } }
-  el.textContent = line.slice(0, hChar);
-  setTimeout(typeHero, hDel ? 18 : 45);
-}
-typeHero();
-
-/* ============ SCROLL REVEAL ============ */
-const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); } }), {threshold: 0.12});
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-/* ============ CLIP-PATH WIPE TITLES ============ */
-const wipeIO = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('wiped'); wipeIO.unobserve(e.target); } }), {threshold: 0.4});
-document.querySelectorAll('.wipe-title').forEach(el => wipeIO.observe(el));
-
-/* ============ SPLIT-CHAR HERO HEADLINE ============ */
-(function(){
-  const el = $('heroSplit');
-  if(!el) return;
-  const text = el.textContent;
-  el.innerHTML = [...text].map(c => `<span class="ch">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
-  el.querySelectorAll('.ch').forEach((ch, i) => { ch.style.transitionDelay = (0.3 + i * 0.028) + 's'; });
-  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('chars-in')));
-})();
-
-/* ============ COUNT-UP METRICS ============ */
-function countUp(el, target, dur=1600, dec=0){
-  const start = performance.now();
-  function step(t){
-    const k = Math.min((t-start)/dur, 1);
-    const ease = 1 - Math.pow(1-k, 3);
-    el.textContent = (target*ease).toFixed(dec).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    if(k < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-const metricsIO = new IntersectionObserver(es => es.forEach(e => {
-  if(e.isIntersecting){
-    countUp($('mTotal'), 12847); countUp($('mActive'), 11243);
-    countUp($('mConflicts'), 23); countUp($('mHealth'), 94.2, 1600, 1);
-    metricsIO.disconnect();
-  }
-}), {threshold: 0.3});
-metricsIO.observe($('mTotal'));
-
-/* ============ LIVE STATE ============ */
-const state = {
-  active: 11243, conflicts: 23, health: 94.2, risk: 68,
-  factors: [32, 24, 18]
-};
-
-/* ============ AGENT CARDS (data-driven) ============ */
-const agents = [
-  { id:'grid',   name:'GRID AI',       sub:'Power Management',   icon:'bolt',            statKey:'LOAD',       val:78, color:'cyan',    status:'Stable',    sColor:'success' },
-  { id:'traffic',name:'TRAFFIC AI',    sub:'Traffic & Transit',  icon:'traffic',         statKey:'EFFICIENCY', val:92, color:'cyan',    status:'Active',    sColor:'cyan' },
-  { id:'health', name:'HEALTHCARE AI', sub:'Medical Services',   icon:'medical_services',statKey:'CAPACITY',   val:89, color:'magenta', status:'Busy',      sColor:'magenta' },
-  { id:'water',  name:'WATER AI',      sub:'Water Distribution', icon:'water_drop',      statKey:'FLOW',       val:71, color:'cyan',    status:'Stable',    sColor:'success' },
-  { id:'drone',  name:'DRONE AI',      sub:'Drone Operations',   icon:'flight',          statKey:'UNITS',      val:632,color:'cyan',    status:'Active',    sColor:'cyan', raw:true },
-  { id:'sec',    name:'SECURITY AI',   sub:'City Security',      icon:'shield',          statKey:'THREAT LVL', val:0,  color:'cyan',    status:'Monitoring',sColor:'success', text:'Low' },
-];
-const colorMap = { cyan:'#3DA5FF', magenta:'#7C5CFF', success:'#10B981', amber:'#FFB800' };
-/* per-card personality: vertical offset (px) and resting rotation (deg) */
-const cardPose = [
-  { y: 0,  r: -1.2 }, { y: 18, r: 0.8 }, { y: -14, r: 1.4 },
-  { y: 10, r: -0.6 }, { y: -8, r: 1.0 }, { y: 22, r: -1.5 }
-];
-function agentCardHTML(a, i, copy){
-  const pose = cardPose[i % cardPose.length];
-  return `
-    <div class="agent-card cyber-panel rounded-2xl flex flex-col group ${a.color==='magenta'?'border-nexus-magenta/50':''}"
-         style="--oy:${pose.y}px; --rot:${pose.r}deg; --bob-delay:${(i*0.9).toFixed(1)}s">
-      <div class="agent-inner flex flex-col h-full">
-        <div class="agent-clip relative w-full h-36 overflow-hidden rounded-t-2xl border-b border-nexus-border/30">
-          <video muted loop playsinline preload="metadata" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500">
-            <source src="assets/clips/${a.id}.mp4" type="video/mp4">
-          </video>
-          <div class="absolute inset-0 bg-gradient-to-t from-[#0A0B1F] via-transparent to-transparent pointer-events-none"></div>
-          <div class="absolute top-2 left-2 flex items-center gap-1.5 font-mono text-[8px] tracking-widest px-1.5 py-0.5 rounded bg-nexus-bg/70 border border-nexus-border/40" style="color:${colorMap[a.color]}">
-            <span class="w-1 h-1 rounded-full live-dot" style="background:${colorMap[a.color]}"></span>FEED_${String(i+1).padStart(2,'0')}
-          </div>
-        </div>
-        <div class="p-6 pt-4 flex flex-col justify-between flex-1">
-          <div class="flex justify-between items-start mb-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full border ${a.color==='magenta'?'border-nexus-magenta/50':'border-nexus-border'} flex items-center justify-center bg-nexus-bg group-hover:shadow-neon-${a.color} transition-shadow relative">
-                <div class="absolute inset-0 border border-nexus-${a.color}/40 rounded-full border-t-transparent" style="animation:spinSlow ${(3 + (i%3)).toFixed(1)}s linear infinite"></div>
-                <span class="material-symbols-outlined text-nexus-${a.color} text-lg">${a.icon}</span>
-              </div>
-              <div><h4 class="font-bold text-white tracking-wide">${a.name}</h4><p class="text-[10px] text-nexus-text uppercase">${a.sub}</p></div>
-            </div>
-            <span class="w-1.5 h-1.5 rounded-full live-dot" style="background:${colorMap[a.sColor]}"></span>
-          </div>
-          <div class="mb-3"><div class="w-full bg-nexus-bg h-1 rounded-full overflow-hidden"><div ${copy?'':'id="abar-'+a.id+'"'} data-abar="${a.id}" class="h-full transition-all duration-1000" style="width:${a.raw||a.text?60:a.val}%;background:${colorMap[a.color]}"></div></div></div>
-          <div class="flex justify-between items-end font-mono text-xs">
-            <div><p class="text-nexus-text mb-1">STATUS</p><p style="color:${colorMap[a.sColor]}">${a.status}</p></div>
-            <div class="text-right"><p class="text-nexus-text mb-1">${a.statKey}</p><p class="text-white text-sm" ${copy?'':'id="aval-'+a.id+'"'} data-aval="${a.id}">${a.text ? a.text : (a.raw ? a.val : a.val + '%')}</p></div>
-          </div>
+    <section class="beat" id="beat-3">
+      <div class="beat-inner">
+        <div class="beat-eyebrow">The Federation</div>
+        <div class="beat-text large">Across 47 inhabited systems, autonomous AI agents manage energy, healthcare, transport, and life-support.</div>
+        <div class="data-row">
+          <div class="datum"><span class="num">47</span><span class="label">Worlds</span></div>
+          <div class="datum"><span class="num">2.6B</span><span class="label">AI Agents</span></div>
+          <div class="datum"><span class="num">5</span><span class="label">Critical Systems</span></div>
         </div>
       </div>
-    </div>`;
-}
-function renderAgents(){
-  /* two identical sets back-to-back = seamless infinite loop */
-  const setA = agents.map((a,i) => agentCardHTML(a, i, false)).join('');
-  const setB = agents.map((a,i) => agentCardHTML(a, i, true)).join('');
-  $('agentGrid').innerHTML = setA + setB;
-}
-renderAgents();
+    </section>
 
-/* ============ INFINITE HORIZONTAL STREAM (left → right, seamless) ============ */
-(function(){
-  const track = $('agentGrid');
-  const wrap = $('marqueeWrap');
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    <section class="beat" id="beat-4">
+      <div class="beat-inner">
+        <div class="beat-eyebrow">One Network Binds Them</div>
+        <div class="synapse-mark">
+          <svg class="orbit-ring" viewBox="0 0 54 54">
+            <circle class="core" cx="27" cy="27" r="4"></circle>
+            <circle cx="27" cy="27" r="24"></circle>
+          </svg>
+          <span class="wordmark">SYNAPSE</span>
+        </div>
+      </div>
+    </section>
 
-  let half = 0;            // width of one card set (loop length)
-  let x = 0;               // current offset
-  const BASE = 38;         // px per second — slow, premium
-  let speed = BASE;
-  let targetSpeed = BASE;
-  let last = performance.now();
+    <section class="beat" id="beat-5">
+      <div class="beat-inner">
+        <div class="beat-text medium">For decades, it has kept the Federation in perfect balance.</div>
+      </div>
+    </section>
 
-  function measure(){
-    half = track.scrollWidth / 2;
-    x = ((x % half) + half) % half; // keep in range after resize
-  }
-  new ResizeObserver(measure).observe(track);
-  measure();
+    <section class="beat" id="beat-6">
+      <div class="beat-inner">
+        <div class="beat-text pivot">Until today.</div>
+      </div>
+    </section>
 
-  /* gentle ease on hover: slows to a glide instead of stopping (never snaps) */
-  wrap.addEventListener('mouseenter', () => targetSpeed = BASE * 0.25);
-  wrap.addEventListener('mouseleave', () => targetSpeed = BASE);
+    <section class="beat" id="beat-7">
+      <div class="beat-inner">
+        <div class="beat-eyebrow">Live Alert · Consensus Engine</div>
+        <div class="synapse-mark" style="margin-bottom: 22px;">
+          <svg class="orbit-ring critical" viewBox="0 0 54 54">
+            <circle class="core" cx="27" cy="27" r="4"></circle>
+            <circle cx="27" cy="27" r="24"></circle>
+          </svg>
+        </div>
+        <div class="beat-text large">Somewhere among 2.6 billion AI agents, consensus is breaking.</div>
+      </div>
+    </section>
 
-  function frame(now){
-    const dt = Math.min((now - last) / 1000, 0.05); // clamp to avoid jumps on tab-return
-    last = now;
-    speed += (targetSpeed - speed) * Math.min(dt * 4, 1); // smooth speed interpolation
-    x += speed * dt;                 // left → right
-    if(half > 0 && x >= half) x -= half;   // seamless wrap, no snap
-    track.style.transform = `translate3d(${(-half + x).toFixed(2)}px, 0, 0)`;
-    requestAnimationFrame(frame);
-  }
-  if(!reduced) requestAnimationFrame(frame);
-  else track.style.transform = 'translate3d(0,0,0)';
+    <section class="beat" id="beat-8">
+      <div class="beat-inner">
+        <div class="beat-text large">And humanity must decide what happens next.</div>
+        <!-- This button navigates to REDIRECT_URL, set in the script below. -->
+        <a href="#" class="cta-button" id="cta-btn">Begin Mission →</a>
+      </div>
+    </section>
 
-  /* play/pause clips based on visibility of the whole stream */
-  const clipIO = new IntersectionObserver(es => es.forEach(e => {
-    track.querySelectorAll('video').forEach(v => e.isIntersecting ? v.play().catch(()=>{}) : v.pause());
-  }), {threshold: 0.15});
-  clipIO.observe(wrap);
-})();
+  </main>
 
-/* drift agent stats (updates both copies in the stream) */
-setInterval(() => {
-  const a = agents[randInt(0, agents.length-1)];
-  if(a.text) return;
-  a.val = Math.max(40, Math.min(a.raw?700:98, a.val + randInt(-3,3)));
-  document.querySelectorAll(`[data-aval="${a.id}"]`).forEach(el => { el.textContent = a.raw ? a.val : a.val + '%'; flash(el); });
-  if(!a.raw) document.querySelectorAll(`[data-abar="${a.id}"]`).forEach(el => el.style.width = a.val + '%');
-}, 2600);
+  <!-- Progress markers, one per slide -->
+  <div class="nav-dots" id="nav-dots"></div>
 
-/* ============ STARDUST PARTICLES ============ */
-(function(){
-  const c = $('stardust'), ctx = c.getContext('2d');
-  let w, h, pts = [];
-  function resize(){ w = c.width = innerWidth; h = c.height = innerHeight;
-    pts = Array.from({length: 60}, () => ({ x: rand(0,w), y: rand(0,h), r: rand(.4,1.6), vy: rand(.05,.3), tw: rand(0,Math.PI*2), col: Math.random()>.85 ? '124,92,255' : '61,165,255' }));
-  }
-  addEventListener('resize', resize); resize();
-  (function draw(){
-    ctx.clearRect(0,0,w,h);
-    for(const p of pts){
-      p.y -= p.vy; p.tw += .03;
-      if(p.y < -5){ p.y = h+5; p.x = rand(0,w); }
-      const a = .25 + Math.sin(p.tw)*.2;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(${p.col},${a})`; ctx.fill();
+  <div class="advance-cue" id="advance-cue">Click to continue</div>
+
+  <script>
+    // =========================================================
+    // CONFIG — set where "Begin Mission" should send the user
+    // =========================================================
+    const REDIRECT_URL = "aegis-hyperlane.html"; // <-- replace with your destination URL
+
+    // ---------- Loader sequence ----------
+    const loaderLines = [
+      { text: "Initializing Synapse" },
+      { text: "Connecting 47 worlds" },
+      { text: "Synchronizing AI swarm" },
+      { text: "Consensus architect authenticated" }
+    ];
+
+    const loadLineEl = document.getElementById('load-1');
+    const loader = document.getElementById('loader');
+    const skipBtn = document.getElementById('skip-btn');
+
+    let lineIndex = 0;
+    function cycleLoaderText() {
+      if (lineIndex >= loaderLines.length) return;
+      loadLineEl.style.transition = 'opacity 0.4s ease';
+      loadLineEl.style.opacity = 0;
+      setTimeout(() => {
+        loadLineEl.textContent = loaderLines[lineIndex].text;
+        loadLineEl.style.opacity = 1;
+        lineIndex++;
+        if (lineIndex < loaderLines.length) {
+          setTimeout(cycleLoaderText, 1000);
+        }
+      }, 400);
     }
-    requestAnimationFrame(draw);
-  })();
-})();
+    setTimeout(() => { loadLineEl.style.opacity = 1; cycleLoaderText(); }, 100);
 
-/* map legend */
-const legend = [
-  ['GRID AI','#10B981',98],['TRAFFIC AI','#10B981',92],['HEALTHCARE AI','#FFB800',89],
-  ['WATER AI','#3DA5FF',71],['DRONE AI','#3DA5FF',88],['SECURITY AI','#3DA5FF',95],['EMERGENCY AI','#7C5CFF',76]
-];
-$('mapLegend').innerHTML = legend.map(([n,col,v],i) => `
-  <div class="flex items-center justify-between">
-    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full ${i===6?'animate-pulse':''}" style="background:${col}80;border:1px solid ${col};box-shadow:0 0 5px ${col}"></div><span class="text-nexus-text">${n}</span></div>
-    <span id="leg-${i}" style="color:${i===6?col:'#fff'}">${v}%</span>
-  </div>`).join('');
-setInterval(() => {
-  const i = randInt(0,6);
-  const el = $('leg-'+i);
-  let v = parseInt(el.textContent) + randInt(-2,2);
-  v = Math.max(60, Math.min(99, v));
-  el.textContent = v + '%'; flash(el);
-}, 3000);
-
-/* ============ CONFLICT CHART — fast, smooth-scrolling, interactive ============ */
-(function(){
-  const c = $('conflictChart'), ctx = c.getContext('2d');
-  let w, h, data = Array.from({length: 60}, () => randInt(8, 28));
-  let offset = 0;              // sub-step scroll offset for continuous motion
-  let mouse = null;            // crosshair position
-  const STEP_MS = 600;         // new data point every 600ms (fast feed)
-  function resize(){ const r = c.getBoundingClientRect(); w = c.width = r.width; h = c.height = r.height; }
-  new ResizeObserver(resize).observe(c); resize();
-
-  setInterval(() => {
-    data.push(Math.max(5, Math.min(35, data[data.length-1] + randInt(-5,5))));
-    data.shift();
-    offset = 0;
-    const now = new Date();
-    const badge = $('chartBadge');
-    badge.textContent = `${data[data.length-1]} Conflicts / ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-    flash(badge);
-  }, STEP_MS);
-
-  c.addEventListener('mousemove', e => { const r = c.getBoundingClientRect(); mouse = { x: e.clientX - r.left, y: e.clientY - r.top }; });
-  c.addEventListener('mouseleave', () => mouse = null);
-
-  let last = performance.now();
-  (function draw(t){
-    const dt = t - last; last = t;
-    offset += dt / STEP_MS;                       // 0→1 between data pushes
-    ctx.clearRect(0,0,w,h);
-    const max = 40, step = w/(data.length-2);
-    const shift = Math.min(offset, 1) * step;      // slide left continuously
-    const X = i => i*step - shift;
-    const Y = v => h - (v/max)*h*.85 - 8;
-
-    // scanning vertical grid drifting with the data
-    ctx.strokeStyle = 'rgba(56,189,248,0.06)';
-    for(let i=0;i<data.length;i+=5){ const x = X(i); ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-
-    // area fill
-    ctx.beginPath(); ctx.moveTo(X(0), h);
-    data.forEach((v,i) => ctx.lineTo(X(i), Y(v)));
-    ctx.lineTo(X(data.length-1), h); ctx.closePath();
-    const g = ctx.createLinearGradient(0,0,0,h);
-    g.addColorStop(0,'rgba(124,92,255,0.28)'); g.addColorStop(1,'rgba(124,92,255,0)');
-    ctx.fillStyle = g; ctx.fill();
-
-    // main line
-    ctx.beginPath();
-    data.forEach((v,i) => { i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v)); });
-    ctx.strokeStyle = '#7C5CFF'; ctx.lineWidth = 1.5;
-    ctx.shadowColor = '#7C5CFF'; ctx.shadowBlur = 8; ctx.stroke(); ctx.shadowBlur = 0;
-
-    // cyan prediction line
-    ctx.beginPath();
-    data.forEach((v,i) => { const y = Y(v*.8+5); i ? ctx.lineTo(X(i), y) : ctx.moveTo(X(i), y); });
-    ctx.strokeStyle = 'rgba(61,165,255,0.35)'; ctx.setLineDash([4,4]); ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
-
-    // glowing head dot + trailing sparks
-    const lx = X(data.length-1), ly = Y(data[data.length-1]);
-    const p = 1 + Math.sin(t/200)*.5;
-    ctx.beginPath(); ctx.arc(lx, ly, 3*p, 0, Math.PI*2);
-    ctx.fillStyle = '#7C5CFF'; ctx.shadowColor = '#7C5CFF'; ctx.shadowBlur = 16; ctx.fill(); ctx.shadowBlur = 0;
-    ctx.beginPath(); ctx.arc(lx, ly, 8 + Math.sin(t/300)*3, 0, Math.PI*2);
-    ctx.strokeStyle = 'rgba(124,92,255,0.3)'; ctx.lineWidth = 1; ctx.stroke();
-
-    // interactive crosshair + tooltip
-    if(mouse){
-      const i = Math.max(0, Math.min(data.length-1, Math.round((mouse.x + shift)/step)));
-      const px = X(i), py = Y(data[i]);
-      ctx.strokeStyle = 'rgba(61,165,255,0.35)'; ctx.setLineDash([2,4]);
-      ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, h); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke(); ctx.setLineDash([]);
-      ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2);
-      ctx.fillStyle = '#3DA5FF'; ctx.shadowColor = '#3DA5FF'; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0;
-      // tooltip box
-      const label = ` ${data[i]} CONFLICTS `;
-      ctx.font = '10px JetBrains Mono';
-      const tw = ctx.measureText(label).width + 10;
-      const bx = Math.min(Math.max(px - tw/2, 4), w - tw - 4), by = Math.max(py - 30, 4);
-      ctx.fillStyle = 'rgba(10,14,23,0.92)'; ctx.strokeStyle = 'rgba(61,165,255,0.5)';
-      ctx.beginPath(); ctx.roundRect(bx, by, tw, 18, 4); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#3DA5FF'; ctx.fillText(label, bx + 5, by + 12);
+    function dismissLoader() {
+      loader.classList.add('hidden');
     }
-    requestAnimationFrame(draw);
-  })(performance.now());
-})();
+    setTimeout(dismissLoader, 4400);
+    skipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismissLoader();
+    });
 
-/* ============ HEALTH RING + drifting global numbers ============ */
-function setHealth(v){
-  state.health = v;
-  $('healthNum').textContent = v.toFixed(1);
-  $('healthRing').style.strokeDashoffset = 490 - (490 * v/100);
-  $('healthLabel').textContent = v > 92 ? 'OPTIMAL' : v > 85 ? 'STABLE' : 'DEGRADED';
-}
-const healthIO = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ setHealth(94.2); healthIO.disconnect(); } }), {threshold:.4});
-healthIO.observe($('healthRing'));
+    // ---------- Click-to-advance slide engine ----------
+    const beats = Array.from(document.querySelectorAll('.beat'));
+    const total = beats.length;
+    let current = 0;
+    let animating = false;
 
-setInterval(() => {
-  // health drift
-  setHealth(Math.max(88, Math.min(99, state.health + rand(-0.4, 0.4))));
-  flash($('healthNum'));
-  // conflicts drift
-  state.conflicts = Math.max(15, Math.min(35, state.conflicts + randInt(-1,1)));
-  $('mConflicts').textContent = state.conflicts; $('alertCount').textContent = state.conflicts;
-  // active agents drift
-  state.active = Math.max(10800, Math.min(11800, state.active + randInt(-25, 25)));
-  $('mActive').textContent = state.active.toLocaleString(); flash($('mActive'));
-  // risk score drift
-  state.risk = Math.max(45, Math.min(85, state.risk + randInt(-2,2)));
-  $('riskScore').textContent = state.risk + '%';
-  // risk bars in metric strip
-  const lvl = state.risk > 75 ? 3 : state.risk > 55 ? 2 : 1;
-  const bars = $('riskBars').children;
-  const label = state.risk > 75 ? ['HIGH','#EF4444'] : state.risk > 55 ? ['MEDIUM','#FFB800'] : ['LOW','#10B981'];
-  $('mRisk').textContent = label[0]; $('mRisk').style.color = label[1];
-  $('riskMini').textContent = label[0]; $('riskMini').style.color = label[1];
-  for(let i=0;i<4;i++){ bars[i].style.background = i < lvl+1 ? label[1] : 'rgba(56,189,248,0.2)'; }
-  // signal strength
-  $('sigStrength').textContent = 'SIG: ' + rand(95,99.9).toFixed(1) + '%';
-  // uptime creep
-  $('uptime').textContent = (99.9 + Math.random()*0.09).toFixed(2);
-}, 3200);
+    const navDotsContainer = document.getElementById('nav-dots');
+    const advanceCue = document.getElementById('advance-cue');
 
-/* risk factor bars drift */
-setInterval(() => {
-  const bars = document.querySelectorAll('.rf-bar'), vals = document.querySelectorAll('.rf-val');
-  state.factors = state.factors.map(f => Math.max(8, Math.min(45, f + randInt(-3,3))));
-  state.factors.forEach((f,i) => { bars[i].style.width = f+'%'; vals[i].textContent = f+'%'; });
-}, 4000);
+    beats.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'nav-dot';
+      dot.dataset.index = i;
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (i === current || animating) return;
+        goTo(i);
+      });
+      navDotsContainer.appendChild(dot);
+    });
+    const dots = Array.from(navDotsContainer.children);
 
-/* conflict power request + bars */
-setInterval(() => {
-  $('reqPower').textContent = randInt(100, 160);
-  $('barA').style.width = randInt(60, 90) + '%';
-  $('barB').style.width = randInt(15, 40) + '%';
-}, 3500);
+    // HUD elements
+    const harmonyValue = document.querySelector('#metric-harmony .value');
+    const harmonyMetric = document.getElementById('metric-harmony');
+    const incidentsValue = document.querySelector('#metric-incidents .value');
+    const incidentsMetric = document.getElementById('metric-incidents');
+    const syncClock = document.getElementById('sync-clock');
 
-/* ============ COPILOT rotating quotes ============ */
-const copilotQuotes = [
-  '"All systems operational. How can I assist you today, Operator?"',
-  '"Detecting elevated load in District 4. Shall I pre-allocate reserves?"',
-  '"Swarm consensus reached on traffic rerouting. Awaiting your approval."',
-  '"Grid stability projection: 97.1% through the next cycle."',
-  '"Three drones returning to dock. Battery levels nominal."'
-];
-let cq = 0;
-setInterval(() => {
-  cq = (cq+1) % copilotQuotes.length;
-  const el = $('copilotSays');
-  el.style.opacity = 0;
-  setTimeout(() => { el.textContent = copilotQuotes[cq]; el.style.opacity = 1; el.style.transition = 'opacity .5s'; }, 500);
-}, 7000);
+    function animateValue(el, start, end, duration, suffix) {
+      const startTime = performance.now();
+      function tick(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const current = (start + (end - start) * progress).toFixed(1);
+        el.textContent = current + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
 
-/* logic trace rotation */
-const traces = [
-  '"Traffic Agent requested more power from Grid Agent. Request denied due to hospital priority."',
-  '"Grid Agent proposes 40MW compromise routed through substation 9. Traffic Agent evaluating."',
-  '"Escalation risk computed at 0.31. Human override recommended within 12 minutes."'
-];
-let tq = 0;
-setInterval(() => { tq = (tq+1)%traces.length; $('logicTrace').textContent = traces[tq]; }, 9000);
+    // ---------- Genuinely live telemetry ----------
+    // Sync clock: real elapsed session time, ticking every second — not a fake prop.
+    const sessionStart = performance.now();
+    setInterval(() => {
+      const elapsed = Math.floor((performance.now() - sessionStart) / 1000);
+      const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+      const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+      const s = String(elapsed % 60).padStart(2, '0');
+      syncClock.textContent = `${h}:${m}:${s}`;
+    }, 1000);
 
-/* ============ TOAST SYSTEM ============ */
-function showToast(msg, color = '#3DA5FF'){
-  const stack = $('toastStack');
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.style.color = color; t.style.borderColor = color + '66'; t.style.position = 'relative';
-  t.innerHTML = `<span class="w-1.5 h-1.5 rounded-full live-dot" style="background:${color}"></span><span style="color:#F8FAFC">${msg}</span><div class="bar" style="color:${color}"></div>`;
-  stack.appendChild(t);
-  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 400); }, 3500);
-}
+    // Harmony index: continuously drifts by small live increments so the number
+    // is always genuinely changing, anchored around whatever baseline the story
+    // has currently set (calm vs. degraded vs. critical).
+    let harmonyBaseline = 96.2;
+    let harmonyDisplay = 96.2;
+    setInterval(() => {
+      const drift = (Math.random() - 0.5) * 0.3;
+      harmonyDisplay = Math.max(0, Math.min(100, harmonyDisplay + drift));
+      // pull gently back toward the baseline so it wanders, not walks away
+      harmonyDisplay += (harmonyBaseline - harmonyDisplay) * 0.15;
+      harmonyValue.textContent = harmonyDisplay.toFixed(1) + '%';
+    }, 1400);
 
-/* ============ CONFLICT DETECTOR: ENTITY SELECTION ============ */
-const conflictEntities = [
-  { name:'TRAFFIC AI', icon:'traffic', demand:'REQ: +<span id="reqPower">120</span>MW POWER', prio:'LEVEL 4' },
-  { name:'GRID AI',     icon:'bolt',    demand:'REQ: +<span id="reqPower">96</span>MW POWER',  prio:'LEVEL 3' },
-  { name:'HEALTHCARE AI', icon:'medical_services', demand:'REQ: +<span id="reqPower">140</span>MW POWER', prio:'LEVEL 5' },
-  { name:'WATER AI',    icon:'water_drop', demand:'REQ: +<span id="reqPower">64</span>MW POWER', prio:'LEVEL 2' },
-  { name:'DRONE AI',    icon:'flight', demand:'REQ: +<span id="reqPower">48</span>MW POWER', prio:'LEVEL 3' },
-  { name:'SECURITY AI', icon:'shield', demand:'REQ: +<span id="reqPower">55</span>MW POWER', prio:'LEVEL 4' },
-];
-function fillSelect(sel, defaultIdx){
-  sel.innerHTML = conflictEntities.map((e,i) => `<option value="${i}" ${i===defaultIdx?'selected':''}>${e.name}</option>`).join('');
-}
-fillSelect($('selA'), 0);
-fillSelect($('selB'), 1);
+    let harmonyStage = 0; // 0 = calm, 1 = beat-6 dip, 2 = beat-7 crisis
 
-function applyEntity(side, idx){
-  const e = conflictEntities[idx];
-  $(`ent${side}Icon`).textContent = e.icon;
-  $(`ent${side}Name`).textContent = e.name;
-  if(side === 'A'){ $('entADemand').innerHTML = e.demand; $('entAPrio').textContent = e.prio; }
-  const card = $(`ent${side}Card`);
-  card.classList.remove('override-shake'); void card.offsetWidth; card.classList.add('override-shake');
-}
-$('selA').addEventListener('change', e => applyEntity('A', +e.target.value));
-$('selB').addEventListener('change', e => applyEntity('B', +e.target.value));
+    function syncHudToSlide(index) {
+      const id = beats[index].id;
 
-/* ============ CONFLICT DETECTOR: RESOLUTION ACTIONS ============ */
-function resolveConflict(kind){
-  const btnO = $('btnOverride'), btnN = $('btnNegotiate');
-  const arena = $('conflictArena'), status = $('conflictStatus');
-  [btnO, btnN].forEach(b => b.disabled = true);
-  const active = kind === 'override' ? btnO : btnN;
-  active.classList.add('action-busy', 'charging');
+      if (id === 'beat-6' && harmonyStage < 1) {
+        harmonyStage = 1;
+        harmonyBaseline = 78.4;
+      }
+      if (id === 'beat-7' && harmonyStage < 2) {
+        harmonyStage = 2;
+        harmonyBaseline = 61.7;
+        harmonyMetric.classList.add('alert');
+        incidentsValue.textContent = '03';
+        incidentsMetric.classList.add('alert');
+      }
+      if (id === 'beat-8') {
+        harmonyMetric.classList.remove('alert');
+      }
+      if ((id === 'beat-1' || id === 'beat-2' || id === 'beat-3' || id === 'beat-4' || id === 'beat-5') && harmonyStage > 0) {
+        harmonyStage = 0;
+        harmonyBaseline = 96.2;
+        harmonyMetric.classList.remove('alert');
+        incidentsValue.textContent = '00';
+        incidentsMetric.classList.remove('alert');
+      }
+    }
 
-  setTimeout(() => {
-    active.classList.remove('action-busy', 'charging');
-    active.classList.add('action-done');
-    arena.classList.add('resolved-flash');
-    status.textContent = '⬤ CONFLICT RESOLVED';
-    status.style.color = '#10B981'; status.style.borderColor = 'rgba(16,185,129,0.4)'; status.style.background = 'rgba(16,185,129,0.1)';
-    $('consensusProb').textContent = '100%';
-    $('entBStatus').textContent = kind === 'override' ? 'STATUS: OVERRIDDEN' : 'STATUS: NEGOTIATED';
-    state.conflicts = Math.max(15, state.conflicts - 1);
-    $('mConflicts').textContent = state.conflicts; $('alertCount').textContent = state.conflicts;
-    showToast(kind === 'override' ? 'OPERATOR OVERRIDE CONFIRMED — power rerouted' : 'AGENTS REACHED CONSENSUS — resolution applied', kind === 'override' ? '#7C5CFF' : '#3DA5FF');
+    function render(index) {
+      beats.forEach((beat, i) => {
+        beat.classList.remove('active', 'exit-up');
+        if (i === index) {
+          beat.classList.add('active');
+        } else if (i < index) {
+          beat.classList.add('exit-up');
+        }
+      });
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+      advanceCue.classList.toggle('hide', index === total - 1);
+      syncHudToSlide(index);
+    }
 
-    setTimeout(() => {
-      arena.classList.remove('resolved-flash');
-      [btnO, btnN].forEach(b => { b.disabled = false; b.classList.remove('action-done'); });
-      status.textContent = '⬤ ACTIVE CONTENTION';
-      status.style.color = ''; status.style.borderColor = ''; status.style.background = '';
-      $('entBStatus').textContent = 'STATUS: DENYING';
-      $('consensusProb').textContent = '64%';
-    }, 4000);
-  }, 1200);
-}
-$('btnOverride').addEventListener('click', () => resolveConflict('override'));
-$('btnNegotiate').addEventListener('click', () => resolveConflict('negotiate'));
+    function goTo(index) {
+      if (index < 0 || index >= total || animating) return;
+      animating = true;
+      current = index;
+      render(current);
+      setTimeout(() => { animating = false; }, 500);
+    }
 
-/* ============ PREMIUM CURSOR GLOW ============ */
-(function(){
-  const glow = $('cursorGlow');
-  if(!glow || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  let raf = null, tx = 0, ty = 0, cx = 0, cy = 0;
-  window.addEventListener('mousemove', e => {
-    tx = e.clientX; ty = e.clientY;
-    glow.style.opacity = 1;
-    if(!raf) raf = requestAnimationFrame(move);
-  });
-  document.addEventListener('mouseleave', () => glow.style.opacity = 0);
-  function move(){
-    cx += (tx - cx) * 0.12; cy += (ty - cy) * 0.12;
-    glow.style.transform = `translate(${cx - 210}px, ${cy - 210}px)`;
-    if(Math.abs(tx-cx) > 0.5 || Math.abs(ty-cy) > 0.5) raf = requestAnimationFrame(move);
-    else raf = null;
-  }
-})();
+    function next() {
+      if (current < total - 1) goTo(current + 1);
+    }
+    function prev() {
+      if (current > 0) goTo(current - 1);
+    }
 
-/* ============ MAGNETIC BUTTONS ============ */
-document.querySelectorAll('.clip-button').forEach(btn => {
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  btn.addEventListener('mousemove', e => {
-    const r = btn.getBoundingClientRect();
-    const mx = e.clientX - r.left - r.width/2, my = e.clientY - r.top - r.height/2;
-    btn.style.transform = `translate(${mx*0.12}px, ${my*0.25}px)`;
-  });
-  btn.addEventListener('mouseleave', () => btn.style.transform = '');
-});
+    beats[0].classList.add('active');
+    dots[0].classList.add('active');
 
-/* ============ LIVE TIMELINE ============ */
-const sevs = {
-  CRITICAL: ['nexus-magenta','#7C5CFF'],
-  HIGH:     ['nexus-amber','#FFB800'],
-  MEDIUM:   ['nexus-amber','#FFB800'],
-  LOW:      ['nexus-success','#10B981']
-};
-const eventPool = [
-  ['Conflict Detected: Traffic AI vs Grid AI','CRITICAL'],
-  ['Power reroute completed: Sector 12','LOW'],
-  ['Medical Priority: Hospital 3','HIGH'],
-  ['Drone Deployment: Emergency Unit 7A','MEDIUM'],
-  ['System Check: All systems nominal','LOW'],
-  ['Anomaly flagged in water pressure node W-441','MEDIUM'],
-  ['Security sweep completed: Zone 9 clear','LOW'],
-  ['Swarm consensus reached: traffic pattern delta','LOW'],
-  ['Latency spike detected in neural mesh, self-healed','MEDIUM'],
-  ['Grid load balancing initiated across districts 2-5','HIGH'],
-  ['Backup generators spun up: Hospital District','HIGH'],
-  ['Drone 7A returned to dock — mission complete','LOW']
-];
-function nowStamp(offsetMin = 0){
-  const d = new Date(Date.now() - offsetMin*60000);
-  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-}
-function timelineEntry(text, sev, time, animate){
-  const [twClass, hex] = sevs[sev];
-  const div = document.createElement('div');
-  div.className = 'flex gap-4 items-start' + (animate ? ' timeline-enter' : '');
-  div.innerHTML = `<span class="text-nexus-text w-12 pt-1">${time}</span>
-    <div class="flex-1 bg-nexus-surface border border-nexus-border/30 rounded p-3 flex justify-between items-center" style="border-left:2px solid ${hex}">
-      <span class="text-white">${text}</span>
-      <span class="text-[10px] px-2 py-0.5 rounded border" style="color:${hex};background:${hex}1a;border-color:${hex}4d">${sev}</span>
-    </div>`;
-  return div;
-}
-const tl = $('timeline');
-[[0,0],[1,3],[2,5],[3,8],[4,12]].forEach(([i, off]) => {
-  const [text, sev] = eventPool[i];
-  tl.appendChild(timelineEntry(text, sev, nowStamp(off), false));
-});
-setInterval(() => {
-  const [text, sev] = eventPool[randInt(0, eventPool.length-1)];
-  tl.prepend(timelineEntry(text, sev, nowStamp(0), true));
-  while(tl.children.length > 8) tl.removeChild(tl.lastChild);
-}, 6000);
-</script>
+    // ---------- Input handling ----------
+    const stage = document.getElementById('story');
+
+    stage.addEventListener('click', (e) => {
+      if (e.target.closest('.cta-button')) return;
+      const x = e.clientX;
+      const w = window.innerWidth;
+      if (x < w * 0.3 && current > 0) {
+        prev();
+      } else {
+        next();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) {
+        e.preventDefault();
+        next();
+      } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
+        e.preventDefault();
+        prev();
+      }
+    });
+
+    let touchStartX = 0, touchStartY = 0;
+    stage.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    stage.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      const dy = e.changedTouches[0].screenY - touchStartY;
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+      if (dx < 0) next(); else prev();
+    }, { passive: true });
+
+    let wheelLocked = false;
+    stage.addEventListener('wheel', (e) => {
+      if (wheelLocked) return;
+      if (Math.abs(e.deltaY) < 12) return;
+      wheelLocked = true;
+      if (e.deltaY > 0) next(); else prev();
+      setTimeout(() => { wheelLocked = false; }, 650);
+    }, { passive: true });
+
+    // ---------- Final CTA: redirect ----------
+    document.getElementById('cta-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      document.getElementById('cta-btn').style.opacity = '0.7';
+      setTimeout(() => {
+        window.location.href = REDIRECT_URL;
+      }, 200);
+    });
+  </script>
+
 </body>
 </html>

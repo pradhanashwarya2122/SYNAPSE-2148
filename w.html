@@ -396,7 +396,7 @@ body.loading { overflow:hidden; }
       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
       HUMAN <span class="text-nexus-text">LAYER PROTOCOL</span>
     </div>
-    <h2 class="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-bold uppercase leading-[0.95] mb-6 tracking-wide">
+    <h2 class="text-5xl lg:text-7xl font-bold uppercase leading-tight mb-4 tracking-wide">
       <span class="block split-chars" id="heroSplit">SUPERVISE THE MINDS</span>
       <span class="hero-line-2 block normal-case font-serif italic font-normal">that run <span class="magic-text">our world</span></span>
     </h2>
@@ -493,10 +493,10 @@ CORE AI ECOSYSTEM
 <h3 class="font-bold text-white text-lg tracking-wide mb-1 wipe-title">CITY AGENT MAP</h3>
 <p class="text-xs text-nexus-text font-mono uppercase flex items-center gap-2"><span class="w-1.5 h-1.5 bg-nexus-cyan rounded-full live-dot"></span>Live network overview</p>
 </div>
-<span class="font-mono text-[10px] text-nexus-cyan border border-nexus-cyan/30 px-2 py-1 rounded bg-nexus-cyan/5" id="mapNodes">7 DISTRICTS</span>
+<span class="font-mono text-[10px] text-nexus-cyan border border-nexus-cyan/30 px-2 py-1 rounded bg-nexus-cyan/5" id="mapNodes">-- NODES</span>
 </div>
 <div class="flex-1 min-h-[340px] relative border border-nexus-border/30 rounded bg-nexus-bg overflow-hidden flex">
-<iframe id="cityMap" src="map_v2.html" title="City Agent Map" class="flex-1 w-full h-full border-0" loading="lazy"></iframe>
+<canvas id="cityMap" class="flex-1 w-full h-full"></canvas>
 <div class="hidden md:flex w-48 bg-nexus-surface border-l border-nexus-border/50 p-4 font-mono text-xs flex-col justify-between">
 <div class="space-y-3" id="mapLegend"></div>
 <button class="mt-4 text-nexus-magenta hover:text-white flex items-center justify-between border-t border-nexus-border/50 pt-3 w-full transition-colors">
@@ -1034,6 +1034,76 @@ setInterval(() => {
     }
     requestAnimationFrame(draw);
   })();
+})();
+
+/* ============ CITY MAP CANVAS ============ */
+(function(){
+  const c = $('cityMap'), ctx = c.getContext('2d');
+  const NODE_COLORS = ['#3DA5FF','#3DA5FF','#10B981','#FFB800','#7C5CFF'];
+  let w, h, nodes = [], links = [], pulses = [];
+  function resize(){
+    const r = c.getBoundingClientRect(); w = c.width = r.width; h = c.height = r.height;
+    nodes = Array.from({length: 26}, (_, i) => ({
+      x: rand(w*.08, w*.92), y: rand(h*.1, h*.9),
+      r: rand(2,4.5), col: NODE_COLORS[randInt(0, NODE_COLORS.length-1)],
+      ph: rand(0, Math.PI*2)
+    }));
+    links = [];
+    for(let i=0;i<nodes.length;i++){
+      let nearest = null, nd = 1e9;
+      for(let j=0;j<nodes.length;j++){ if(i===j) continue;
+        const d = (nodes[i].x-nodes[j].x)**2 + (nodes[i].y-nodes[j].y)**2;
+        if(d < nd){ nd = d; nearest = j; }
+      }
+      links.push([i, nearest]);
+      if(Math.random() > .6) links.push([i, randInt(0, nodes.length-1)]);
+    }
+    $('mapNodes').textContent = nodes.length + ' NODES';
+  }
+  new ResizeObserver(resize).observe(c); resize();
+  setInterval(() => {
+    const [a,b] = links[randInt(0, links.length-1)];
+    pulses.push({ a, b, t: 0, col: nodes[a].col });
+  }, 400);
+  (function draw(t){
+    ctx.clearRect(0,0,w,h);
+    // grid backdrop
+    ctx.strokeStyle = 'rgba(56,189,248,0.05)'; ctx.lineWidth = 1;
+    for(let x=0; x<w; x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+    for(let y=0; y<h; y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    // links
+    ctx.strokeStyle = 'rgba(61,165,255,0.10)';
+    for(const [a,b] of links){ ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke(); }
+    // pulses travelling along links
+    pulses = pulses.filter(p => p.t <= 1);
+    for(const p of pulses){
+      p.t += 0.02;
+      const A = nodes[p.a], B = nodes[p.b];
+      const x = A.x + (B.x-A.x)*p.t, y = A.y + (B.y-A.y)*p.t;
+      ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI*2);
+      ctx.fillStyle = p.col; ctx.shadowColor = p.col; ctx.shadowBlur = 8; ctx.fill(); ctx.shadowBlur = 0;
+    }
+    // nodes breathing
+    for(const n of nodes){
+      const pulse = 1 + Math.sin(t/700 + n.ph)*.35;
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r*pulse*2.6, 0, Math.PI*2);
+      ctx.fillStyle = n.col + '15'; ctx.fill();
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r*pulse, 0, Math.PI*2);
+      ctx.fillStyle = n.col; ctx.shadowColor = n.col; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
+    }
+    // radar sweep
+    const ang = (t/3000) % (Math.PI*2);
+    const cx = w/2, cy = h/2, R = Math.max(w,h);
+    const grad = ctx.createConicGradient ? null : null;
+    ctx.save();
+    ctx.translate(cx, cy); ctx.rotate(ang);
+    const g = ctx.createLinearGradient(0,0,R*.5,0);
+    g.addColorStop(0,'rgba(61,165,255,0.10)'); g.addColorStop(1,'rgba(61,165,255,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,-0.25,0.05); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    requestAnimationFrame(draw);
+  })(0);
 })();
 
 /* map legend */
