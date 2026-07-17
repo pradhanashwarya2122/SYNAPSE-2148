@@ -144,10 +144,6 @@ PROJECT SYNAPSE explores a future where humans no longer govern infrastructure d
 
 ---
 
-<div align="center">
-
-<img src="https://media.tenor.com/9mcy3m3wK8QAAAAC/stars-space.gif" width="100%">
-
 ## 🚀 PROJECT SYNAPSE
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:EC4899,40:7C3AED,70:2563EB,100:0B1020&height=120&section=footer"/>
