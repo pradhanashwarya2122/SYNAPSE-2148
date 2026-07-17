@@ -64,10 +64,6 @@ The problem isn't intelligence.
 
 # 👤 Your Mission
 
-<p align="center">
-<img src="https://media.tenor.com/6LkN5vY2lCcAAAAC/artificial-intelligence-ai.gif" width="75%">
-</p>
-
 As the **Consensus Architect**, you become humanity's final safeguard.
 
 Your mission is to monitor autonomous intelligence, understand AI reasoning, simulate intervention strategies, and restore harmony before localized conflicts become interstellar catastrophes.
@@ -103,10 +99,6 @@ Restore Harmony
 
 # ✨ Frontend Experience
 
-<p align="center">
-<img src="https://media.tenor.com/rBNaJ6vL7kAAAAAC/hologram-futuristic.gif" width="90%">
-</p>
-
 - 🌌 Interactive Mission Control
 - ⚡ Smooth Animations & Micro-interactions
 - 📊 Dynamic Data Visualizations
@@ -117,10 +109,6 @@ Restore Harmony
 ---
 
 # 🎨 Design Language
-
-<p align="center">
-<img src="https://media.tenor.com/Va4VvJ8Jw7IAAAAC/space-universe.gif" width="90%">
-</p>
 
 PROJECT SYNAPSE is inspired by futuristic command centers and deep-space interfaces.
 
